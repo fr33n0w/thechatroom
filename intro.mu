@@ -6,7 +6,7 @@ import datetime
 
 DB_PATH = 'users.db'
 PAGE_PATH = '/intro.mu'
-TITLE = ' `!` `B112`>>> THE CHAT ROOM! <<< `!`b \n `Baaa`F009` Powered by Reticulum / NomadNet - IRC Style - Free Global Chat Room - Optimized for Meshchat - v1.2b `f `!`b '
+TITLE = ' `!` `B112`>>> THE CHAT ROOM! <<< `! `b \n `Baaa`F009` Powered by Reticulum / NomadNet - IRC Style - Free Global Chat Room - Optimized for Meshchat - v1.2b `f `! `b '
 
 def header():
     print('#!c=0')
@@ -60,7 +60,7 @@ def save_user(conn, identity, nickname, lxmf_address):
 
 # Start page
 header()
-print_env_cache()
+# print_env_cache()
 conn = init_db()
 
 remote_identity = os.environ.get('remote_identity')
@@ -82,14 +82,27 @@ if remote_identity:
 
     if nickname and not change_nick_mode:
         print(f'''
+-
+>Welcome back, `B211`Faaa` `!` {nickname}!`b`!
+-
 
->Welcome back, `B111`Faaa` {nickname}`b!
+>Nickname settings:
+Set a new nickname: `B444`Faaa`!`<nick`{nickname}>`b `B444`Faaa` `[<Save>`:/page/index.mu`]`! `b
 
-Set a new nickname: `B444` <{nickname}>`b! `!`[<Set & Save>`:/page/index.mu`]`!
+>Nickname and UI Settings:
+Set Nickname color: `= `B900`<^|color|Red`>`b  Red `B090`<^|color|Green`>`b Green `B009`<^|color|Blue`>`b Blue `= 
+
+Chat Theme: a     b     c     d
+
+`!
+-
+>Identity and LXMF address setting:
 Your Identity is: {remote_identity}
-Your LXMF Address: {dest}
+Your LXMF Address is: {dest}
+Share LXMF Address to allow private chats? `= `B090`<^|share_lxmf|Yes`>`bYes `B900`<^|share_lxmf|No`>`bNo `=
+Allow /whois command? `= `B090`<^|whois_enabled|Yes`>`bYes `B900`<^|whois_enabled|No`>`bNo `=
 
-
+`c
 `!`[<Join Chatroom>`:/page/index.mu`]`!  `!`[<Nickname & Settings>`:/page/settings.mu`]`!
 ''')
         if lxmf_share == '1':
