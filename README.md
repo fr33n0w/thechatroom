@@ -19,6 +19,8 @@ thechatroom.db = primo test db sql (non implementato nello script principale che
 
 topic.json = file del topic salvato dal comando /topic
 
+intro.mu = nuova aggiunta per la nuova versione della chat, è la landing page principale della futura versione :D
+
 idee e work in progress:
 correggere il contatore dei messaggi perchè al momento include anche il conteggio dei messaggi service dei comandi vari
 implementare sql con possibilità di: creare canali chat multipli, ognuno col suo topic, i suoi messaggi e la sua lista utenti, definire diverse modalità utente (normale, op, admin)
