@@ -370,10 +370,16 @@ elif cmd == "/time":
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": time_text})
 
 elif cmd == "/version":
-    version_text = "The Chat Room v1.2b // Powered by Reticulum NomadNet // IRC Style // Optimized for Meshchat // Made by F."
+    version_text = "The Chat Room v1.3b // Powered by Reticulum NomadNet // IRC Style // Optimized for Meshchat // Made by F."
     version_text2 = "This chat is running on a VPS server, powered by RNS v1.0.0 and Nomadnet v.0.8.0."
+    version_text3 = "Latest Implementations in v1.3b: AntiSpam Filter,"
+    version_text4 = "Nickname persistency with lxmf binding (Thanks To: Thomas!!)"
+
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text})
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text2})
+    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text3})
+    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text4})
+
 
 elif cmd.startswith("/lastseen "):
     target_user = cmd[10:].strip()
@@ -457,7 +463,7 @@ def get_color(name):
     return colors[sum(ord(c) for c in name.lower()) % len(colors)]
 
 # Output UI
-template = "> `!` >>> THE CHAT ROOM! <<<   `F009` Powered by Reticulum / NomadNet - IRC Style - Free Global Chat Room - Optimized for Meshchat - v1.2b `F `!` \n"
+template = "> `!` >>> THE CHAT ROOM! <<<   `F009` Powered by Reticulum / NomadNet - IRC Style - Free Global Chat Room - Optimized for Meshchat - v1.3b `F `!` \n"
 template += "-"
 template += f"\n`Fe0f`!` ########## Room Topic: {topic_text} `! (Set by: {topic_author}, {topic_data.get('time')}) `!` ########## `!`f \n"
 template += "-\n"
