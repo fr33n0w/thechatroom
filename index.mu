@@ -1,19 +1,196 @@
 #!/usr/bin/env python3
-import os, sys, json, time, random
+import os, sys, json, time, random, re, sqlite3
 
+DB_PATH = os.path.join(os.path.dirname(__file__), "chatusers.db")
+
+
+spam_patterns = [
+    r"buy\s+now",
+    r"free\s+money",
+    r"fr[e3]{2}\s+m[o0]ney",
+    r"click\s+here",
+    r"cl[i1]ck\s+h[e3]re",
+    r"subscribe\s+(now|today)",
+    r"win\s+big",
+    r"w[i1]n\s+b[i1]g",
+    r"limited\s+offer",
+    r"act\s+now",
+    r"get\s+rich\s+quick",
+    r"make\s+money\s+fast",
+    r"easy\s+cash",
+    r"work\s+from\s+home",
+    r"double\s+your\s+income",
+    r"guaranteed\s+results",
+    r"risk[-\s]*free",
+    r"lowest\s+price",
+    r"no\s+credit\s+check",
+    r"instant\s+approval",
+    r"earn\s+\$\d+",
+    r"cheap\s+meds",
+    r"online\s+pharmacy",
+    r"lose\s+weight\s+fast",
+    r"miracle\s+cure",
+    r"bitcoin\s+offer",
+    r"b[i1]tcoin\s+deal",
+    r"earn\s+bitcoin",
+    r"make\s+money\s+with\s+bitcoin",
+    r"crypto\s+investment",
+    r"crypto\s+deal",
+    r"get\s+rich\s+with\s+crypto",
+    r"eth[e3]reum\s+promo",
+    r"buy\s+crypto\s+now",
+    r"invest\s+in\s+(crypto|bitcoin|ethereum)"
+]
+
+spam_patterns += [
+    r"\bfree\s+(bitcoin|crypto|ethereum)\b",
+    r"\bsell\s+(bitcoin|crypto|ethereum)\b",
+    r"\bi\s+sell\s+(bitcoin|bitcoins|crypto|ethereum)\b",
+    r"\bbuy\s+(bitcoin|crypto|ethereum)\b",
+    r"\bget\s+(bitcoin|crypto|ethereum)\b",
+    r"\bmake\s+money\s+(with|from)\s+(bitcoin|crypto|ethereum)\b",
+    r"\binvest\s+(in|into)\s+(bitcoin|crypto|ethereum)\b",
+    r"\bbitcoin\s+(promo|deal|offer|discount)\b",
+    r"\bcrypto\s+(promo|deal|offer|discount)\b"
+]
+
+spam_patterns += [
+    r"\bfree\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b",
+    r"\b(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\s+for\s+you\b",
+    r"\bsell\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b",
+    r"\bbuy\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b",
+    r"\bi\s+sell\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b",
+    r"\bget\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b",
+    r"\bmake\s+money\s+(with|from)\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b",
+    r"\binvest\s+(in|into)\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b"
+]
+
+spam_patterns += [
+    r"(?:\W|^)(bitcoin|bitcoins|crypto|ethereum|tokens|coins)(?:\W|$)",  # matches with punctuation or boundaries
+    r"\b(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\s+for\s+(free|you)\b",
+    r"\bfree\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b",
+    r"\bget\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b",
+    r"\bmake\s+money\s+(with|from)\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b"
+]
+
+
+# Recover input from environment variables
 def recover_input(key_suffix):
     for k, v in os.environ.items():
         if k.lower().endswith(key_suffix):
             return v.strip()
     return ""
 
-raw_username = recover_input("username")
-message      = recover_input("message")
+raw_username     = recover_input("username")
+message          = recover_input("message")
+remote_identity  = recover_input("remote_identity")
+nickname         = recover_input("field_username")  # This is prioritized
+dest             = recover_input("dest")
 
+# Fallback to command-line arguments if needed
 if not raw_username and len(sys.argv) > 1:
     raw_username = sys.argv[1].strip()
 if not message and len(sys.argv) > 2:
     message = sys.argv[2].strip()
+if not dest and len(sys.argv) > 3:
+    dest = sys.argv[3].strip()
+
+# Extract hash code from remote identity and LXMF address
+hash_code = remote_identity[-4:] if remote_identity else ""
+dest_code = dest[-4:] if dest else ""
+
+# Smart fallback for display name
+if nickname:
+    display_name = nickname
+elif dest:
+    display_name = f"Guest_{dest_code}"
+else:
+    display_name = "Guest"
+
+# os env print for debug test
+#print("> Meshchat Environment Variables:\n")
+#for key, value in os.environ.items():
+#   print(f"{key} = {value}")
+
+# os env print test to check recovered inputs
+#print(f"[DEBUG] Recovered Inputs:")
+#print(f"  Username        : {raw_username}")
+#print(f"  Message         : {message}")
+#print(f"  Nickname        : {nickname}")
+#print(f"  Nickfieldname        : {field_nickname}")
+#print(f"  Remote Identity : {remote_identity}")
+#print(f"  Hash Code       : {hash_code}")
+#print(f"  LXMF Code       : {dest_code}")
+#print(f"  LXMF Address    : {dest}")
+#print(f"  Display Name    : {display_name}")
+#print("Using database at:", os.path.abspath(DB_PATH))
+
+# sql db nick binding and recovering
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            remote_identity TEXT,
+            dest TEXT UNIQUE NOT NULL,
+            display_name TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def get_display_name_from_db(dest):
+    if not dest:
+        return None
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT display_name FROM users WHERE dest = ?", (dest,))
+    result = cursor.fetchone()
+    conn.close()
+    return result[0] if result else None
+
+def save_user_to_db(remote_identity, dest, display_name):
+    if not remote_identity or not dest:
+        return  # Don't save if required info is missing
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO users (remote_identity, dest, display_name)
+        VALUES (?, ?, ?)
+        ON CONFLICT(dest) DO UPDATE SET
+            remote_identity = excluded.remote_identity,
+            display_name = excluded.display_name
+    """, (remote_identity, dest, display_name))
+    conn.commit()
+    conn.close()
+
+# Initialize DB
+init_db()
+
+# Get environment variables
+nickname = os.getenv("field_username", "").strip()
+dest = os.getenv("dest", "").strip()
+remote_identity = os.getenv("remote_identity", "").strip()
+
+# Try to load display_name from DB
+db_display_name = get_display_name_from_db(dest)
+
+# Determine final display_name
+if nickname:
+    display_name = nickname
+elif db_display_name:
+    display_name = db_display_name
+elif dest:
+    display_name = f"Guest_{dest[-4:]}"
+else:
+    display_name = "Guest"
+
+# Save user to DB if valid
+save_user_to_db(remote_identity, dest, display_name)
+
+# -----------------------------------------------
 
 safe_username = (
     raw_username.replace("`", "").replace("<", "").replace(">", "")
@@ -237,18 +414,37 @@ elif cmd == "/ping":
         "text": "PONG! (System is up and working!)"
     })
 
-
 elif raw_username and message and message.lower() != "null":
     sanitized_message = message.replace("`", "")  # remove backticks to prevent formatting issues
-    log.append({"time": time.strftime("[%H:%M:%S]"), "user": safe_username, "text": sanitized_message})
-    try:
-        with open(log_file, "w") as f:
-            json.dump(log, f)
-        debug.append(f" Message by '{safe_username}' sent!")
-    except Exception as e:
-        debug.append(f" Send error: {e}")
+
+    # 🔍 Spam detection logic
+    banned_words = ["buy now", "free money", "click here", "subscribe", "win big", "limited offer", "act now"]
+    is_spam = any(re.search(pattern, sanitized_message.lower()) for pattern in spam_patterns)
+
+    if is_spam:
+        # 🚫 Don't write to JSON, just log the system message
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": "System",
+            "text": "Spam Detected! Message Blocked!"
+        })
+        debug.append(f" Spam blocked from '{safe_username}'")
+    else:
+        # ✅ Normal message flow
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": safe_username,
+            "text": sanitized_message
+        })
+        try:
+            with open(log_file, "w") as f:
+                json.dump(log, f)
+            debug.append(f" Message by '{safe_username}' sent!")
+        except Exception as e:
+            debug.append(f" Send error: {e}")
 else:
     debug.append(" Skipped sending: Missing username or message")
+
 
 # Color system
 colors = [
@@ -269,11 +465,15 @@ for msg in log[-DISPLAY_LIMIT:]:
     color = get_color(msg["user"])
     template += f"[{msg['time']} `{color}` `!` `*` <{msg['user']}>`b `! `*` {msg['text']}\n"
 template += "-"
-template += f"\n>`!` Nickname: `Baaa`F000`<13|username`{safe_username}>`b`F"
+# sanitize and read name from display_name os env
+safe_display_name = display_name.replace("`", "'")
+template += f"\n>`!` Nickname: `Baaa`F000`<13|username`{safe_display_name}>`b`F"
+
 template += f"   Message: `B999`<57|message`>`b"
 template += " `[  <Send message>`:/page/index.mu`username|message]`!  `!`[<Reload Page>`:/page/index.mu`username]`!\n"
 
 template += "-"
-template += f"\n`B111`Fe0f` User commands: /info, /help, /stats, /users, /lastseen <user>, /topic, /time, /version    `b`F   `Baaa`F000` `!` Total Messages: {len(log)} `[<Read Full ChatLog>`:/page/fullchat.mu]`!`b`F`f"
-
+template += f"\n`B222`Fe0f` User commands: /info, /help, /stats, /users, /lastseen <user>, /topic, /time, /version    `b`F   `Baaa`F000` `!` Total Messages: {len(log)} `[<Read Full ChatLog>`:/page/fullchat.mu]`!`b`f`f"
+template += "\n-"
+template += f"\n\n `B222`F90f` Note: To save your nickname (persistency across sessions), set your nickname and press the fingerprint button on MeshChat! \n        To recover it on new sessions (only if it doesn't appear due to lost fingerprint) just press it again!`b`f`"
 print(template)
