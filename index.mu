@@ -228,7 +228,7 @@ except Exception as e:
 
 # Commands logic
 cmd = message.strip().lower()
-if safe_username == "4dm1n@@@" and cmd == "/clear":
+if safe_username == "fr4dm1n@@@" and cmd == "/clear":
     if log:
         removed = log.pop()
         debug.append(f"Removed last message: <{removed['user']}> {removed['text']}")
@@ -241,7 +241,7 @@ if safe_username == "4dm1n@@@" and cmd == "/clear":
     else:
         debug.append("No messages to clear.")
 
-elif safe_username == "4dm1n@@@" and cmd == "/clearall":
+elif safe_username == "fr4dm1n@@@" and cmd == "/clearall":
     if log:
         log.clear()
         debug.append("All messages cleared by admin.")
@@ -370,16 +370,18 @@ elif cmd == "/time":
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": time_text})
 
 elif cmd == "/version":
-    version_text = "The Chat Room v1.3b // Powered by Reticulum NomadNet // IRC Style // Optimized for Meshchat // Made by F."
+    version_text = "The Chat Room v1.4b / Powered by Reticulum NomadNet / IRC Style / Optimized for Meshchat / Made by F"
     version_text2 = "This chat is running on a VPS server, powered by RNS v1.0.0 and Nomadnet v.0.8.0."
     version_text3 = "Latest Implementations in v1.3b: AntiSpam Filter,"
     version_text4 = "Nickname persistency with lxmf binding (Thanks To: Thomas!!)"
+    version_text5 = "Latest Implementations in v1.4b: Improved UI with Message splitting on long messages"
+
 
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text})
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text2})
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text3})
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text4})
-
+    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text5})
 
 elif cmd.startswith("/lastseen "):
     target_user = cmd[10:].strip()
@@ -462,21 +464,46 @@ colors = [
 def get_color(name):
     return colors[sum(ord(c) for c in name.lower()) % len(colors)]
 
+# Define helper function to split long messages
+
+MAX_CHARS = 100  # Adjust as needed
+
+def split_message(text, max_chars):
+    words = text.split()
+    lines = []
+    current_line = ""
+    for word in words:
+        if len(current_line) + len(word) + 1 <= max_chars:
+            current_line += (" " if current_line else "") + word
+        else:
+            lines.append(current_line)
+            current_line = word
+    if current_line:
+        lines.append(current_line)
+    return lines
+
+
 # Output UI
-template = "> `!` >>> THE CHAT ROOM! <<<   `F009` Powered by Reticulum / NomadNet - IRC Style - Free Global Chat Room - Optimized for Meshchat - v1.3b `F `!` \n"
-template += "-"
-template += f"\n`Fe0f`!` ########## Room Topic: {topic_text} `! (Set by: {topic_author}, {topic_data.get('time')}) `!` ########## `!`f \n"
+template = "> `!` >>> THE CHAT ROOM! <<<   `F009` Powered by Reticulum / NomadNet - IRC Style - Free Global Chat Room - Optimized for Meshchat - v1.4b `F `!` \n"
 template += "-\n"
+template += f"`c`Fe0f`!` ########## Room Topic: {topic_text} `! (Set by: {topic_author}, {topic_data.get('time')}) `!` ########## `!`f`a \n"
+template += "-\n"
+
 for msg in log[-DISPLAY_LIMIT:]:
     color = get_color(msg["user"])
-    template += f"[{msg['time']} `{color}` `!` `*` <{msg['user']}>`b `! `*` {msg['text']}\n"
+    message_lines = split_message(msg["text"], MAX_CHARS)
+    total_parts = len(message_lines)
+    for i, line in enumerate(message_lines, start=1):
+        marker = f"({i}/{total_parts})" if total_parts > 1 else ""
+        template += f"\\[{msg['time']}\\ `{color}` `!` `*` <{msg['user']}>`b `! `*` {line} {marker}\n"
+
 template += "-"
 # sanitize and read name from display_name os env
 safe_display_name = display_name.replace("`", "'")
 template += f"\n>`!` Nickname: `Baaa`F000`<13|username`{safe_display_name}>`b`F"
 
-template += f"   Message: `B999`<57|message`>`b"
-template += " `[  <Send message>`:/page/index.mu`username|message]`!  `!`[<Reload Page>`:/page/index.mu`username]`!\n"
+template += f"   Message: `B999`<54|message`>`b"
+template += " `[ <Send>`:/page/index.mu`username|message]`!  `!`[<Reload Page>`:/page/index.mu`username]`!  `!`[<Settings>`:/page/index.mu`username]`!\n"
 
 template += "-"
 template += f"\n`B222`Fe0f` User commands: /info, /help, /stats, /users, /lastseen <user>, /topic, /time, /version    `b`F   `Baaa`F000` `!` Total Messages: {len(log)} `[<Read Full ChatLog>`:/page/fullchat.mu]`!`b`f`f"
