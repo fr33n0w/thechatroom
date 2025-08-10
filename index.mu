@@ -240,6 +240,7 @@ except Exception as e:
     debug.append(f"Failed to load log: {e}")
 
 # Commands logic
+
 cmd = message.strip().lower()
 if safe_username == "fr4dm1n@@@" and cmd == "/clear":
     if log:
@@ -320,11 +321,12 @@ elif cmd == "/help":
         "`!` /help`!` : Show all the available user commands",
         "`!` /stats`!` : Show chatroom statistics, including Top 5 Chatters",
         "`!` /users`!` : List all chatroom users",
-        "`!` /topic`!` : Show or Change Room Topic, usage: '/topic' or '/topic Your New Topic Here' ",
-        "`!` /time`!` : Show current server and user time",
-        "`!` /ping`!`: Reply with PONG! if the chat system is up and working",
         "`!` /lastseen <username>`!`: Last seen user info and latest user message",
-        "`!` /version`!`: Show chatroom version",
+        "`!` /topic`!` : Show or Change Room Topic, usage: '/topic' or '/topic Your New Topic Here' ",
+        "`!` /search <keyword(s)>`!` : Search for keywords in the full chatlog ",
+        "`!` /time`!` : Show current Chat Server Time (UTC) and your Local Time",
+        "`!` /ping`!`: Reply with PONG! if the chat system is up and working",
+        "`!` /version`!`: Show chatroom script version info",
 
     ]
     for line in help_lines:
@@ -383,11 +385,11 @@ elif cmd == "/time":
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": time_text})
 
 elif cmd == "/version":
-    version_text = "The Chat Room v1.4b / Powered by Reticulum NomadNet / IRC Style / Optimized for Meshchat / Made by F"
+    version_text = "The Chat Room v1.44b / Powered by Reticulum NomadNet / IRC Style / Optimized for Meshchat / Made by F"
     version_text2 = "This chat is running on a VPS server, powered by RNS v1.0.0 and Nomadnet v.0.8.0."
-    version_text3 = "Latest Implementations in v1.3b: AntiSpam Filter,"
-    version_text4 = "Nickname persistency with lxmf binding (Thanks To: Thomas!!)"
-    version_text5 = "Latest Implementations in v1.4b: Improved UI with Message splitting on long messages"
+    version_text3 = "Latest Implementations in v1.3b: AntiSpam Filter and Nickname persistency (Thanks To: Thomas!!)"
+    version_text4 = "Latest Implementations in v1.4b: Improved UI with Message splitting on long messages"
+    version_text5 = "Latest Implementations in v1.44b: Improved UI, resolved few ui bugs, added Menu Bar on the bottom, added /search command, added 'Read Last 100 Messages', started implementing user settings (for future user preferences implementations: custom nickname colors, multiple chat themes and more...coming soon!)"
 
 
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text})
@@ -395,6 +397,7 @@ elif cmd == "/version":
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text3})
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text4})
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text5})
+
 
 elif cmd.startswith("/lastseen "):
     target_user = cmd[10:].strip()
@@ -427,6 +430,47 @@ elif cmd == "/topic":
         "user": "System",
         "text": f"Current Topic: {topic_text} (set by {topic_author} on {topic_data.get('time')})"
     })
+
+elif cmd.startswith("/search"):
+    search_input = message[8:].strip().lower()
+
+    if not search_input:
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": "System",
+            "text": "`!` Error! Command Usage: /search <keywords> - Please provide one or more keywords! `!`"
+        })
+    else:
+        keywords = search_input.split()
+        matches = []
+
+        for msg in log:
+            if msg.get("user") == "System":
+                continue
+            text = msg.get("text", "").lower()
+            if all(kw in text for kw in keywords):
+                matches.append(msg)
+
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": "System",
+            "text": f"`!` Search Results for: '{search_input}' - {len(matches)} match(es) found. `!`"
+        })
+
+        for match in matches[:10]:
+            log.append({
+                "time": time.strftime("[%H:%M:%S]"),
+                "user": "System",
+                "text": f"[{match.get('time', '??')}] <{match.get('user', '??')}> {match.get('text', '')}"
+            })
+
+        if len(matches) > 10:
+            log.append({
+                "time": time.strftime("[%H:%M:%S]"),
+                "user": "System",
+                "text": "`!` Showing first 10 results. Refine your search for more specific matches. `!`"
+            })
+
 
 elif cmd == "/ping":
     log.append({
@@ -493,10 +537,10 @@ def split_message(text, max_chars):
     return lines
 
 
-# Output UI template:
+############################## Output UI template: ######################################
 
-#INTRO
-template = "> `!` >>> THE CHAT ROOM! <<<   `F009` Powered by Reticulum / NomadNet - IRC Style - Free Global Chat Room - Optimized for Meshchat - v1.4b `F `!` \n"
+#INTRO TITLE:
+template = "> `!` >>> THE CHAT ROOM! <<<   `F009` Powered by Reticulum / NomadNet - IRC Style - Free Global Chat Room - Optimized for Meshchat - v1.44b `F `!` \n"
 template += "-\n"
 
 # TOPIC READING AND RENDERING:
@@ -521,15 +565,10 @@ template += f" `[{send_icon}  Send Message`:/page/index.mu`username|message]`! |
 
 
 # USER COMMANDS MENU
-template += f"`B111`Fe0f` User Commands: /info, /help, /stats, /users, /lastseen <user>, /topic, /time, /ping, /version                                     `b`f\n"
+template += f"`B111`Fe0f` User Commands: /info, /help, /stats, /users, /lastseen <user>, /topic, /search <keyword(s)>, /time, /ping, /version              `b`f\n"
 template += "-\n"
 # MENUBAR
 template += f"`B411`Faaa` `!` {message_icon}  On Screen Messages: ({DISPLAY_LIMIT}) | {totmsg_icon}  `[Read Last 100`:/page/last100.mu]`  |  {message_icon}  Total Messages: ({len(log)}) | {totmsg_icon}  `[Read Full Chat Log (Slow)`:/page/fullchat.mu]`!   | `!`[{setup_icon}  User Settings  `:/page/index.mu`username]`!`b`f\n"
-
-
-#template += "-\n"
-#
-
 
 
 # FOOTER NOTE
@@ -537,3 +576,5 @@ template += f"\n\n `B211`F90f` Note: To save your nickname (persistency across s
 
 # RENDER UI:
 print(template)
+
+############################## END OF UI Template: ######################################
