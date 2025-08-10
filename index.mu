@@ -3,7 +3,12 @@ import os, sys, json, time, random, re, sqlite3
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "chatusers.db")
 
+# EDITABLE SETTINGS:
+MAX_CHARS = 100  # Adjust as needed to split messages after N chars
+DISPLAY_LIMIT = 25 # Adjust how many visible messages you want in the UI
 
+
+# Antispam filters:
 spam_patterns = [
     r"buy\s+now",
     r"free\s+money",
@@ -215,7 +220,6 @@ except:
 
 
 log_file = os.path.join(os.path.dirname(__file__), "chat_log.json")
-DISPLAY_LIMIT = 25
 debug = []
 
 try:
@@ -464,10 +468,7 @@ colors = [
 def get_color(name):
     return colors[sum(ord(c) for c in name.lower()) % len(colors)]
 
-# Define helper function to split long messages
-
-MAX_CHARS = 100  # Adjust as needed
-
+# Define helper function to split long messages using MAX CHARS const 
 def split_message(text, max_chars):
     words = text.split()
     lines = []
