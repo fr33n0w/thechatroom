@@ -4,9 +4,18 @@ import os, sys, json, time, random, re, sqlite3
 DB_PATH = os.path.join(os.path.dirname(__file__), "chatusers.db")
 
 # EDITABLE SETTINGS:
-MAX_CHARS = 100  # Adjust as needed to split messages after N chars
+MAX_CHARS = 105  # Adjust as needed to split messages after N chars
 DISPLAY_LIMIT = 25 # Adjust how many visible messages you want in the UI
 
+# UI Emojis:
+user_icon = "\U0001F464" # "\U0001F465" - "\U0001FAAA"
+message_icon = "\U0001F4AC" 
+msg2_icon = "\u2709\ufe0f"
+send_icon = "\U0001F4E4"
+totmsg_icon = "\U0001F4E9"
+reload_icon = "\u21BB"
+setup_icon = "\u2699\ufe0f"
+cmd_icon = "\U0001F4BB" # \U0001F579
 
 # Antispam filters:
 spam_patterns = [
@@ -296,8 +305,8 @@ elif cmd == "/users":
     })
 
     # Show in chunks of N with message counts
-    for i in range(0, total_users, 6):
-        chunk = ", ".join(f"`!` {user} `!({count}msg)" for user, count in sorted_users[i:i+6])
+    for i in range(0, total_users, 7):
+        chunk = ", ".join(f"`!` {user} `!({count}msg)" for user, count in sorted_users[i:i+7])
         log.append({
             "time": time.strftime("[%H:%M:%S]"),
             "user": "System",
@@ -484,30 +493,47 @@ def split_message(text, max_chars):
     return lines
 
 
-# Output UI
+# Output UI template:
+
+#INTRO
 template = "> `!` >>> THE CHAT ROOM! <<<   `F009` Powered by Reticulum / NomadNet - IRC Style - Free Global Chat Room - Optimized for Meshchat - v1.4b `F `!` \n"
 template += "-\n"
-template += f"`c`Fe0f`!` ########## Room Topic: {topic_text} `! (Set by: {topic_author}, {topic_data.get('time')}) `!` ########## `!`f`a \n"
+
+# TOPIC READING AND RENDERING:
+template += f"`c`B111`Fe0f`!`  ########## Room Topic: {topic_text} `! (Set by: {topic_author}, {topic_data.get('time')}) `!` ########## `!`f`b`a\n"
 template += "-\n"
 
+# CHATLOG READING AND RENDERING:
 for msg in log[-DISPLAY_LIMIT:]:
     color = get_color(msg["user"])
     message_lines = split_message(msg["text"], MAX_CHARS)
     total_parts = len(message_lines)
     for i, line in enumerate(message_lines, start=1):
         marker = f"({i}/{total_parts})" if total_parts > 1 else ""
-        template += f"\\[{msg['time']}\\ `{color}` `!` `*` <{msg['user']}>`b `! `*` {line} {marker}\n"
-
+        template += f"\\[{msg['time']} `{color}` `!` `*` <{msg['user']}>`b `! `*` {line} \n"
 template += "-"
 # sanitize and read name from display_name os env
 safe_display_name = display_name.replace("`", "'")
-template += f"\n>`!` Nickname: `Baaa`F000`<13|username`{safe_display_name}>`b`F"
 
-template += f"   Message: `B999`<54|message`>`b"
-template += " `[ <Send>`:/page/index.mu`username|message]`!  `!`[<Reload Page>`:/page/index.mu`username]`!  `!`[<Settings>`:/page/index.mu`username]`!\n"
+# User Interaction Bar (Nick & Messages )
+template += f"\n>`!` {user_icon} Nickname: `Baaa`F000`<13|username`{safe_display_name}>`b`F    {message_icon}  Message:  `B999`<51|message`>`b"
+template += f" `[{send_icon}  Send Message`:/page/index.mu`username|message]`! |`!`[{reload_icon} Reload Page`:/page/index.mu`username]`!\n"
+template += "-\n"
 
-template += "-"
-template += f"\n`B222`Fe0f` User commands: /info, /help, /stats, /users, /lastseen <user>, /topic, /time, /version    `b`F   `Baaa`F000` `!` Total Messages: {len(log)} `[<Read Full ChatLog>`:/page/fullchat.mu]`!`b`f`f"
-template += "\n-"
-template += f"\n\n `B222`F90f` Note: To save your nickname (persistency across sessions), set your nickname and press the fingerprint button on MeshChat! \n        To recover it on new sessions (only if it doesn't appear due to lost fingerprint) just press it again!`b`f`"
+# MENUBAR
+template += f"\n`B411`Faaa` `!` {message_icon}  On Screen Messages: ({DISPLAY_LIMIT}) | {totmsg_icon}  `[Read Last 100`:/page/last100.mu]`  |  {message_icon}  Total Messages: ({len(log)}) | {totmsg_icon}  `[Read Full Chat Log (Slow)`:/page/fullchat.mu]`!   | `!`[{setup_icon}  User Settings  `:/page/index.mu`username]`!`b`f\n"
+
+
+# USER COMMANDS MENU
+template += f"\n\n`B333`Fe0f` {cmd_icon}  User Commands: /info, /help, /stats, /users, /lastseen <user>, /topic, /time, /ping, /version                                  `b`f"
+
+#template += "-\n"
+#
+
+
+
+# FOOTER NOTE
+template += f"\n\n `B211`F90f` Note: To save your nickname (persistency across sessions), set your nickname and press the fingerprint button on MeshChat! \n        To recover it on new sessions (only if it doesn't appear due to lost fingerprint) just press it again!`b`f`"
+
+# RENDER UI:
 print(template)
