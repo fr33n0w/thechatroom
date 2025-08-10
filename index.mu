@@ -559,17 +559,21 @@ template += "-"
 # sanitize and read name from display_name os env
 safe_display_name = display_name.replace("`", "'")
 
+
+
 # User Interaction Bar (Nick & Messages )
-template += f"\n>`!` {user_icon} Nickname: `Baaa`F000`<13|username`{safe_display_name}>`b`F    {message_icon}  Message:  `B999`<51|message`>`b"
+template += f"\n>`!` {user_icon} Nickname: `Baac`F000`<13|username`{safe_display_name}>`b`F    {message_icon}  Message:  `Baac`<51|message`>`b"
 template += f" `[{send_icon}  Send Message`:/page/index.mu`username|message]`! |`!`[{reload_icon} Reload Page`:/page/index.mu`username]`!\n"
 
-
-# USER COMMANDS MENU
-template += f"`B111`Fe0f` User Commands: /info, /help, /stats, /users, /lastseen <user>, /topic, /search <keyword(s)>, /time, /ping, /version              `b`f\n"
-template += "-\n"
 # MENUBAR
-template += f"`B411`Faaa` `!` {message_icon}  On Screen Messages: ({DISPLAY_LIMIT}) | {totmsg_icon}  `[Read Last 100`:/page/last100.mu]`  |  {message_icon}  Total Messages: ({len(log)}) | {totmsg_icon}  `[Read Full Chat Log (Slow)`:/page/fullchat.mu]`!   | `!`[{setup_icon}  User Settings  `:/page/index.mu`username]`!`b`f\n"
+template += f"`B317`Faaa` `!` {message_icon}  On Screen Messages: ({DISPLAY_LIMIT}) | {totmsg_icon}  `[Read Last 100`:/page/last100.mu]`  |  {message_icon}  Total Messages: ({len(log)}) | {totmsg_icon}  `[Read Full Chat Log (Slow)`:/page/fullchat.mu]`!   | `!`[{setup_icon}  User Settings  `:/page/index.mu`username]`!`b`f"
 
+
+
+# USER COMMANDS
+template += "\n-\n"
+template += f"`B111`Fe0f` User Commands: /info, /help, /stats, /users, /lastseen <user>, /topic, /search <keyword(s)>, /time, /ping, /version              `b`f\n"
+# template += "-\n"
 
 # FOOTER NOTE
 template += f"\n\n `B211`F90f` Note: To save your nickname (persistency across sessions), set your nickname and press the fingerprint button on MeshChat! \n        To recover it on new sessions (only if it doesn't appear due to lost fingerprint) just press it again!`b`f`"
