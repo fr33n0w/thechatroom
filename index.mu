@@ -2,10 +2,12 @@
 import os, sys, json, time, random, re, sqlite3
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "chatusers.db")
+EMO_DB = os.path.join(os.path.dirname(__file__), "emoticons.txt")
 
 # EDITABLE SETTINGS:
 MAX_CHARS = 105  # Adjust as needed to split messages after N chars
 DISPLAY_LIMIT = 25 # Adjust how many visible messages you want in the UI
+SYSADMYN = "fr4dm1n@@@" # SET YOUR ADMIN NICKNAME FOR CHAT ADMIN COMMANDS
 
 # UI Emojis:
 user_icon = "\U0001F464" # "\U0001F465" - "\U0001FAAA"
@@ -86,7 +88,6 @@ spam_patterns += [
     r"\bget\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b",
     r"\bmake\s+money\s+(with|from)\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b"
 ]
-
 
 # Recover input from environment variables
 def recover_input(key_suffix):
@@ -239,29 +240,57 @@ except Exception as e:
     log = []
     debug.append(f"Failed to load log: {e}")
 
-# Commands logic
+# USER COMMANDS LOGIC:
 
 cmd = message.strip().lower()
-if safe_username == "fr4dm1n@@@" and cmd == "/clear":
-    if log:
-        removed = log.pop()
-        debug.append(f"Removed last message: <{removed['user']}> {removed['text']}")
-        try:
-            with open(log_file, "w") as f:
-                json.dump(log, f)
-            debug.append("Log updated after clearing.")
-        except Exception as e:
-            debug.append(f"Clear error: {e}")
-    else:
-        debug.append("No messages to clear.")
 
-elif safe_username == "fr4dm1n@@@" and cmd == "/clearall":
+if safe_username == SYSADMYN and cmd.startswith("/clear"):
+    parts = cmd.split()
+
+    if len(parts) == 1:
+        # /clear → remove last message
+        if log:
+            removed = log.pop()
+            debug.append(f"Removed last message: <{removed['user']}> {removed['text']}")
+        else:
+            debug.append("No messages to clear.")
+
+    elif len(parts) == 2 and parts[1].isdigit():
+        # /clear N → remove last N messages
+        count = int(parts[1])
+        removed_count = 0
+        while log and removed_count < count:
+            removed = log.pop()
+            debug.append(f"Removed: <{removed['user']}> {removed['text']}")
+            removed_count += 1
+        debug.append(f"Cleared last {removed_count} messages.")
+
+    elif len(parts) == 3 and parts[1] == "user":
+        # /clear user NICKNAME → remove all messages from that user
+        target_user = parts[2]
+        original_len = len(log)
+        log[:] = [msg for msg in log if msg.get("user") != target_user]
+        removed_count = original_len - len(log)
+        debug.append(f"Cleared {removed_count} messages from user '{target_user}'.")
+
+    else:
+        debug.append("Invalid /clear syntax. Use /clear, /clear N, or /clear user NICKNAME.")
+
+    # Save updated log
+    try:
+        with open(log_file, "w", encoding="utf-8") as f:
+            json.dump(log, f, indent=2, ensure_ascii=False)
+        debug.append("Log updated after clearing.")
+    except Exception as e:
+        debug.append(f"Clear command error: {e}")
+
+elif safe_username == SYSADMYN and cmd == "/clearall":
     if log:
         log.clear()
         debug.append("All messages cleared by admin.")
         try:
-            with open(log_file, "w") as f:
-                json.dump(log, f)
+            with open(log_file, "w", encoding="utf-8") as f:
+                json.dump(log, f, indent=2, ensure_ascii=False)
             debug.append("Log successfully emptied.")
         except Exception as e:
             debug.append(f"ClearAll error: {e}")
@@ -289,6 +318,7 @@ elif cmd == "/stats":
     top_line = "`!` Top chatters: `!` " + " , ".join([f"`!` {user} ({count} msg) `!`" for user, count in top_users[:5]])
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": top_line})
 
+
 elif cmd == "/users":
     # Count messages per user
     from collections import Counter
@@ -314,9 +344,10 @@ elif cmd == "/users":
             "text": chunk
         })
 
+ 
 elif cmd == "/help":
     help_lines = [
-        "`!` Chatroom Commands:`!`",
+        "`!` CHATROOM EXTENDED USER COMMANDS INFO:`!`",
         "`!` /info`!` : Show The Chat Room! Informations, Usage and Disclaimer",
         "`!` /help`!` : Show all the available user commands",
         "`!` /stats`!` : Show chatroom statistics, including Top 5 Chatters",
@@ -325,8 +356,12 @@ elif cmd == "/help":
         "`!` /topic`!` : Show or Change Room Topic, usage: '/topic' or '/topic Your New Topic Here' ",
         "`!` /search <keyword(s)>`!` : Search for keywords in the full chatlog ",
         "`!` /time`!` : Show current Chat Server Time (UTC) and your Local Time",
-        "`!` /ping`!`: Reply with PONG! if the chat system is up and working",
-        "`!` /version`!`: Show chatroom script version info",
+        "`!` /ping`!` : Reply with PONG! if the chat system is up and working",
+        "`!` /version`!` : Show chatroom script version info",
+        "`!` /e`!` : Sends a random emoji from the internal emoji list",
+        "`!` /c <text message>`!` : Sends a colored chat message with randomized bg and font color",
+        "`!` END OF COMMAND LIST`!` : RELOAD THE PAGE TO GO BACK TO THE CHATROOM",
+
 
     ]
     for line in help_lines:
@@ -479,15 +514,101 @@ elif cmd == "/ping":
         "text": "PONG! (System is up and working!)"
     })
 
+elif cmd == "/e":
+    try:
+        with open(EMO_DB, "r", encoding="utf-8") as f:
+            emojis = [line.strip() for line in f if line.strip()]
+        
+        if emojis and safe_username:
+            import random
+            chosen = random.choice(emojis)
+
+            # Treat emoji as a normal message
+            log.append({
+                "time": time.strftime("[%H:%M:%S]"),
+                "user": safe_username,
+                "text": chosen
+            })
+
+            try:
+                with open(log_file, "w") as f:
+                    json.dump(log, f)
+                debug.append(f" Emoji by '{safe_username}' sent: {chosen}")
+            except Exception as e:
+                debug.append(f" Emoji send error: {e}")
+        else:
+            log.append({
+                "time": time.strftime("[%H:%M:%S]"),
+                "user": "System",
+                "text": "`!` Emoji list is empty or username missing. `!`"
+            })
+            debug.append(" Emoji command skipped: missing emoji or username.")
+    except Exception as e:
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": "System",
+            "text": f"`!` Error loading emojis: {e} `!`"
+        })
+        debug.append(f" Emoji command error: {e}")
+
+##### COLOR /c COMMAND ######
+
+elif cmd.startswith("/c "):
+    user_message = message[3:].strip().replace("`", "")  # Remove backticks to avoid formatting issues
+
+    if user_message and safe_username:
+        import random, json
+
+        def hex_brightness(hex_code):
+            r = int(hex_code[0], 16)
+            g = int(hex_code[1], 16)
+            b = int(hex_code[2], 16)
+            return (r + g + b) / 3
+
+        # Generate random hex color for background
+        bg_raw = ''.join(random.choices("0123456789ABCDEF", k=3))
+        bg_color = f"B{bg_raw}"
+
+        # Calculate brightness
+        brightness = hex_brightness(bg_raw)
+        font_color = "F000" if brightness > 7.5 else "FFF"
+
+        # Split message into chunks of 80 characters
+        def split_and_colorize(text, chunk_size=80):
+            chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
+            return '\n'.join([f"`{bg_color}`{font_color}` {chunk} `b`f" for chunk in chunks])
+
+        colorful_text = split_and_colorize(user_message)
+
+        # Create log entry
+        entry = {
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": safe_username,
+            "text": colorful_text
+        }
+
+        log.append(entry)
+
+        # Write to JSON file
+        try:
+            with open(log_file, "w", encoding="utf-8") as f:
+                json.dump(log, f)
+            debug.append(f"Test: Message saved to log.json by '{safe_username}'")
+        except Exception as e:
+            debug.append(f"Error writing to log.json: {e}")
+    else:
+        debug.append("Test: Color command skipped due to missing message or username.")
+
+
 elif raw_username and message and message.lower() != "null":
     sanitized_message = message.replace("`", "")  # remove backticks to prevent formatting issues
 
-    # 🔍 Spam detection logic
+    # ?? Spam detection logic
     banned_words = ["buy now", "free money", "click here", "subscribe", "win big", "limited offer", "act now"]
     is_spam = any(re.search(pattern, sanitized_message.lower()) for pattern in spam_patterns)
 
     if is_spam:
-        # 🚫 Don't write to JSON, just log the system message
+        # ?? Don't write to JSON, just log the system message
         log.append({
             "time": time.strftime("[%H:%M:%S]"),
             "user": "System",
@@ -495,7 +616,7 @@ elif raw_username and message and message.lower() != "null":
         })
         debug.append(f" Spam blocked from '{safe_username}'")
     else:
-        # ✅ Normal message flow
+        # ? Normal message flow
         log.append({
             "time": time.strftime("[%H:%M:%S]"),
             "user": safe_username,
@@ -564,19 +685,18 @@ safe_display_name = display_name.replace("`", "'")
 # User Interaction Bar (Nick & Messages )
 template += f"\n>`!` {user_icon} Nickname: `Baac`F000`<13|username`{safe_display_name}>`b`F    {message_icon}  Message:  `Baac`<51|message`>`b"
 template += f" `[{send_icon}  Send Message`:/page/index.mu`username|message]`! |`!`[{reload_icon} Reload Page`:/page/index.mu`username]`!\n"
+# template += "-\n"
 
 # MENUBAR
-template += f"`B317`Faaa` `!` {message_icon}  On Screen Messages: ({DISPLAY_LIMIT}) | {totmsg_icon}  `[Read Last 100`:/page/last100.mu]`  |  {message_icon}  Total Messages: ({len(log)}) | {totmsg_icon}  `[Read Full Chat Log (Slow)`:/page/fullchat.mu]`!   | `!`[{setup_icon}  User Settings  `:/page/index.mu`username]`!`b`f"
-
-
-
+template += f"`B317`Faaa` `!` {message_icon}  On Screen Messages: ({DISPLAY_LIMIT}) | {totmsg_icon}  `[Read Last 100`:/page/last100.mu]`  |  {message_icon}  Total Messages: ({len(log)}) | {totmsg_icon}  `[Read Full Chat Log (Slow)`:/page/fullchat.mu]`!   | `!`[{setup_icon}  User Settings  `:/page/index.mu`username]`!`b`f\n"
+template += "-\n"
 # USER COMMANDS
-template += "\n-\n"
-template += f"`B111`Fe0f` User Commands: /info, /help, /stats, /users, /lastseen <user>, /topic, /search <keyword(s)>, /time, /ping, /version              `b`f\n"
+# template += "\n-\n"
+template += f"`B316`Fe0f` {cmd_icon}  User Commands: /info, /help, /stats, /users, /lastseen <user>, /topic, /search <keyword(s)>, /time, /ping, /version, /e, /c    `b`f\n"
 # template += "-\n"
 
 # FOOTER NOTE
-template += f"\n\n `B211`F90f` Note: To save your nickname (persistency across sessions), set your nickname and press the fingerprint button on MeshChat! \n        To recover it on new sessions (only if it doesn't appear due to lost fingerprint) just press it again!`b`f`"
+template += f"`B315`F90f`  * Note: For Nickname persistency, press the 'FingerPrint' button on MeshChat (v2.2.0+). To recover your session, press it again. `b`f`"
 
 # RENDER UI:
 print(template)
