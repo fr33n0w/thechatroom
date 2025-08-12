@@ -6,11 +6,11 @@ EMO_DB = os.path.join(os.path.dirname(__file__), "emoticons.txt")
 
 # EDITABLE SETTINGS:
 MAX_CHARS = 105  # Adjust as needed to split messages after N chars
-DISPLAY_LIMIT = 27 # Adjust how many visible messages you want in the UI
+DISPLAY_LIMIT = 28 # Adjust how many visible messages you want in the UI
 SYSADMYN = "fr4dm1n@@@" # SET YOUR ADMIN NICKNAME FOR CHAT ADMIN COMMANDS
 
 # UI Emojis:
-user_icon = "\U0001F464" # "\U0001F465" - "\U0001FAAA"
+user_icon = "\U0001F464" # "\U0001F464" # "\U0001F465" - "\U0001FAAA"
 message_icon = "\U0001F4AC" 
 msg2_icon = "\u2709\ufe0f"
 send_icon = "\U0001F4E4"
@@ -19,6 +19,8 @@ reload_icon = "\u21BB"
 setup_icon = "\u2699\ufe0f"
 cmd_icon = "\U0001F4BB" # \U0001F579
 nickset_icon = "\U0001F504"
+info_icon = "\u1F6C8"
+stats_icon = "\u1F4DD"
 
 # Antispam filters:
 spam_patterns = [
@@ -330,7 +332,7 @@ elif cmd == "/stats":
     top_line = "`!` Top chatters: `!` " + " , ".join([f"`!` {user} ({count} msg) `!`" for user, count in top_users[:5]])
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": top_line})
 
-
+############ /users COMMAND ##############
 elif cmd == "/users":
     # Count messages per user
     from collections import Counter
@@ -356,35 +358,36 @@ elif cmd == "/users":
             "text": chunk
         })
 
- 
+############# /cmd COMMAND INFO LINES ############
 elif cmd == "/cmd":
     help_lines = [
-        "`!` CHATROOM EXTENDED USER COMMANDS INFO:`!`",
+        f"`! {message_icon} THE CHATROOM!{message_icon}  \\  EXTENDED USER COMMANDS INFO:`!",
+        f"`! GENERAL USE AND INFORMATIONAL COMMANDS:`!",
+        f"`! /info`! :  Show The Chat Room! Informations, Usage and Disclaimer",
+        f"`! /cmd`! : Show all the available user commands",
+        f"`! /stats`! : Show chatroom statistics, including Top 5 Chatters",
+        f"`! /users`! : List all chatroom users",
+        f"`! /version`! : Show THE CHAT ROOM! script version, news and infos",
         "--------------------------------------",
-        "`!` GENERAL USE AND INFORMATIONAL COMMANDS:`!`",
-        "`!` /info`!` : Show The Chat Room! Informations, Usage and Disclaimer",
-        "`!` /cmd`!` : Show all the available user commands",
-        "`!` /stats`!` : Show chatroom statistics, including Top 5 Chatters",
-        "`!` /users`!` : List all chatroom users",
-        "`!` /version`!` : Show THE CHAT ROOM! script version, news and infos",
-        "--------------------------------------",
-        "`!` INTERACTIVE CHAT COMMANDS`!`",
+        f"`!` {cmd_icon} INTERACTIVE CHAT COMMANDS`!`",
         "`!` /lastseen <username>`!`: Last seen user info and latest user message",
         "`!` /topic`!` : Show or Change Room Topic, usage: '/topic' or '/topic Your New Topic Here' ",
         "`!` /search <keyword(s)>`!` : Search for keywords in the full chatlog ",
         "`!` /time`!` : Show current Chat Server Time (UTC) and your Local Time",
         "`!` /ping`!` : Reply with PONG! if the chat system is up and working",
         "--------------------------------------",
-        "`!` SOCIAL INTERACTIONS COMMANDS`!`",
+        f"`!` {cmd_icon} SOCIAL INTERACTIONS COMMANDS`!`",
         "`!` /e`!` : Sends randomized emojis from the internal emoji list",
         "`!` /c <text message>`!` : Sends a colored chat message with randomized background and font colors",
         "`!` @nickname`!` : Sends a colored mention to highlight the mentioned user in a reply message",
         "`!` $e`!` : Sends a random emoticon using '$e', usable in every part of the message. ",
+        "`!` /welcome`! : Sends a welcome message. Usage: /welcome or /welcome <nickname>. ",
         "--------------------------------------",
-        "`!` USER STATUS INTERACTIONS COMMANDS`!`",
-        "`!` /hi , /bye, /brb, /lol, /exit, /quit, /away, /welcome`!`",
-        "`!` Commands Usage Example:`!` /hi Hello World! (Syntax is valid for all the above commands!)",
-        "`!` END OF COMMAND LIST`!` : RELOAD THE PAGE TO GO BACK TO THE CHATROOM!",
+        f"`!` {cmd_icon} USER STATUS INTERACTIONS COMMANDS`!`",
+        "`!` /hi, /bye, /brb, /lol, /exit, /quit, /away, /back `!`",
+        "`!` Commands Usage Example:  /hi Hello World! `! (Syntax is valid for all the above commands!)",
+        "--------------------------------------",
+        "`!` END OF COMMAND LIST: `[RELOAD THE PAGE TO GO BACK TO THE CHATROOM`:/page/index.mu`username]` `! ",
 
     ]
     for line in help_lines:
@@ -431,7 +434,7 @@ elif cmd == "/info":
             "text": line
         })
 
-
+############ TIME COMMAND ###############
 elif cmd == "/time":
     server_time = time.strftime("%Y-%m-%d %H:%M:%S")
     try:
@@ -442,14 +445,14 @@ elif cmd == "/time":
     time_text = f"Server time: {server_time} // User time (Naples): {user_time}"
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": time_text})
 
+############ VERSION COMMAND ##########
 elif cmd == "/version":
     version_text = "The Chat Room v1.45b / Powered by Reticulum NomadNet / IRC Style / Optimized for Meshchat / Made by F"
     version_text2 = "This chat is running on a VPS server, powered by RNS v1.0.0 and Nomadnet v.0.8.0."
     version_text3 = "Latest Implementations in v1.3b: AntiSpam Filter and Nickname persistency (Thanks To: Thomas!!)"
     version_text4 = "Latest Implementations in v1.4b: Improved UI with Message splitting on long messages"
     version_text5 = "Latest Implementations in v1.44b: Improved UI, resolved few ui bugs, added Menu Bar on the bottom, added /search command, added 'Read Last 100 Messages', started implementing user settings (for future user preferences implementations: custom nickname colors, multiple chat themes and more...coming soon!)"
-    version_text6 = "Latest Implementations in v1.45b: Added Social Interactions Commands, for full command list: /cmd"
-
+    version_text6 = "Latest Implementations in v1.45b: Added Social Interactions Commands, for full command list: /cmd \n Improved UI and readability"
 
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text})
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text2})
@@ -818,7 +821,7 @@ elif cmd.startswith("/away"):
         # Build message
         base_text = f"{colored_nickname} is away."
         if user_message:
-            full_text = f" `!{base_text} Status: {user_message} `!"
+            full_text = f" `!{base_text} (Status: {user_message}) `!"
         else:
             full_text = f" `!{base_text} `!"
         log.append({
@@ -834,6 +837,37 @@ elif cmd.startswith("/away"):
             "user": "System",
             "text": f"`!` Error processing /away command: {e} `!`"
         })
+
+###### /back COMMAND #######
+elif cmd.startswith("/back"):
+    try:
+        parts = cmd.split(" ", 1)
+        user_message = parts[1].strip() if len(parts) > 1 else ""
+        timestamp = time.strftime("[%H:%M:%S]")
+        # Get color code for nickname
+        nickname_color = get_color(safe_username)
+        # Format nickname using your markup style
+        colored_nickname = f"`{nickname_color}{safe_username}`b"
+        # Build message
+        base_text = f"{colored_nickname} is back! "
+        if user_message:
+            full_text = f" `!{base_text} {user_message} `!"
+        else:
+            full_text = f" `!{base_text} everyone! `!"
+        log.append({
+            "time": timestamp,
+            "user": "System",
+            "text": full_text
+        })
+        with open(log_file, "w") as f:
+            json.dump(log, f)
+    except Exception as e:
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": "System",
+            "text": f"`!` Error processing /back command: {e} `!`"
+        })
+
 
 ###### /welcome COMMAND #######
 elif cmd.startswith("/welcome"):
@@ -953,7 +987,7 @@ template = f"> `!{message_icon}  THE CHAT ROOM! {message_icon}  `F007` Powered b
 template += "-\n"
 
 # TOPIC READING AND RENDERING:
-template += f"`c`B111`Fe0f`!`  ########## Room Topic: {topic_text} `! (Set by: {topic_author}, {topic_data.get('time')}) `!` ########## `!`f`b`a\n"
+template += f"`c`B000`Ff2e`!`  ########## Room Topic: {topic_text} `! (Set by: {topic_author}, {topic_data.get('time')}) `!` ########## `!`f`b`a\n"
 template += "-\n"
 
 # CHATLOG READING AND RENDERING (original): 
@@ -982,7 +1016,7 @@ for msg in log[-effective_limit:]:
             highlighted_line = highlight_mentions_in_line(line, known_users)  # Highlight @mentions
         else:
             highlighted_line = line  # Skip substitutions for System user
-        template += f"\\[{msg['time']} `!` `*` `{color}{msg['user']}:`b `!`*` {highlighted_line} \n"
+        template += f"`Ffff` \\{msg['time']} `*` `{color}{msg['user']}:`b `*` {highlighted_line} \n"
 template += "-"
 
 
@@ -990,6 +1024,8 @@ template += "-"
 safe_display_name = display_name.replace("`", "'")
 
 # User Interaction Bar (Nick & Messages )
+# template += f"\n`Ffff`! {user_icon} Nickname: `Bddf`F000`<12|username`{safe_display_name}>`!`B000`Ffff`[{nickset_icon} `:/page/index.mu`username]`! | {message_icon}  Message: `Bddf`F000`<52|message`>`b`!"
+# template += f" `!`Ffff`[{send_icon} Send Message`:/page/index.mu`username|message]`! | `!`[{reload_icon} Reload`:/page/index.mu`username]`!\n"
 template += f"\n>`!` {user_icon} Nickname: `Baac`F000`<12|username`{safe_display_name}>`!`b`[{nickset_icon} `:/page/index.mu`username]`!   {message_icon}  Message: `Baac`<52|message`>`b`!"
 template += f" `!`[{send_icon}  Send Message`:/page/index.mu`username|message]`! | `!`[{reload_icon} Reload`:/page/index.mu`username]`!\n"
 
