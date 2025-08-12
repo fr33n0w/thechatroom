@@ -6,7 +6,7 @@ EMO_DB = os.path.join(os.path.dirname(__file__), "emoticons.txt")
 
 # EDITABLE SETTINGS:
 MAX_CHARS = 105  # Adjust as needed to split messages after N chars
-DISPLAY_LIMIT = 25 # Adjust how many visible messages you want in the UI
+DISPLAY_LIMIT = 27 # Adjust how many visible messages you want in the UI
 SYSADMYN = "fr4dm1n@@@" # SET YOUR ADMIN NICKNAME FOR CHAT ADMIN COMMANDS
 
 # UI Emojis:
@@ -18,6 +18,7 @@ totmsg_icon = "\U0001F4E9"
 reload_icon = "\u21BB"
 setup_icon = "\u2699\ufe0f"
 cmd_icon = "\U0001F4BB" # \U0001F579
+nickset_icon = "\U0001F504"
 
 # Antispam filters:
 spam_patterns = [
@@ -88,6 +89,17 @@ spam_patterns += [
     r"\bget\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b",
     r"\bmake\s+money\s+(with|from)\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b"
 ]
+
+# Color system
+colors = [
+    "B900", "B090", "B009", "B099", "B909", "B066", "B933", "B336", "B939",
+    "B660", "B030", "B630", "B363", "B393", "B606", "B060", "B003", "B960", "B999",
+    "B822", "B525", "B255", "B729", "B279", "B297", "B972", "B792", "B227", "B277",
+    "B377", "B773", "B737", "B003", "B111", "B555", "B222", "B088", "B808", "B180"
+]
+def get_color(name):
+    return colors[sum(ord(c) for c in name.lower()) % len(colors)]
+
 
 # Recover input from environment variables
 def recover_input(key_suffix):
@@ -345,23 +357,34 @@ elif cmd == "/users":
         })
 
  
-elif cmd == "/help":
+elif cmd == "/cmd":
     help_lines = [
         "`!` CHATROOM EXTENDED USER COMMANDS INFO:`!`",
+        "--------------------------------------",
+        "`!` GENERAL USE AND INFORMATIONAL COMMANDS:`!`",
         "`!` /info`!` : Show The Chat Room! Informations, Usage and Disclaimer",
-        "`!` /help`!` : Show all the available user commands",
+        "`!` /cmd`!` : Show all the available user commands",
         "`!` /stats`!` : Show chatroom statistics, including Top 5 Chatters",
         "`!` /users`!` : List all chatroom users",
+        "`!` /version`!` : Show THE CHAT ROOM! script version, news and infos",
+        "--------------------------------------",
+        "`!` INTERACTIVE CHAT COMMANDS`!`",
         "`!` /lastseen <username>`!`: Last seen user info and latest user message",
         "`!` /topic`!` : Show or Change Room Topic, usage: '/topic' or '/topic Your New Topic Here' ",
         "`!` /search <keyword(s)>`!` : Search for keywords in the full chatlog ",
         "`!` /time`!` : Show current Chat Server Time (UTC) and your Local Time",
         "`!` /ping`!` : Reply with PONG! if the chat system is up and working",
-        "`!` /version`!` : Show chatroom script version info",
-        "`!` /e`!` : Sends a random emoji from the internal emoji list",
-        "`!` /c <text message>`!` : Sends a colored chat message with randomized bg and font color",
-        "`!` END OF COMMAND LIST`!` : RELOAD THE PAGE TO GO BACK TO THE CHATROOM",
-
+        "--------------------------------------",
+        "`!` SOCIAL INTERACTIONS COMMANDS`!`",
+        "`!` /e`!` : Sends randomized emojis from the internal emoji list",
+        "`!` /c <text message>`!` : Sends a colored chat message with randomized background and font colors",
+        "`!` @nickname`!` : Sends a colored mention to highlight the mentioned user in a reply message",
+        "`!` $e`!` : Sends a random emoticon using '$e', usable in every part of the message. ",
+        "--------------------------------------",
+        "`!` USER STATUS INTERACTIONS COMMANDS`!`",
+        "`!` /hi , /bye, /brb, /lol, /exit, /quit, /away, /welcome`!`",
+        "`!` Commands Usage Example:`!` /hi Hello World! (Syntax is valid for all the above commands!)",
+        "`!` END OF COMMAND LIST`!` : RELOAD THE PAGE TO GO BACK TO THE CHATROOM!",
 
     ]
     for line in help_lines:
@@ -420,11 +443,12 @@ elif cmd == "/time":
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": time_text})
 
 elif cmd == "/version":
-    version_text = "The Chat Room v1.44b / Powered by Reticulum NomadNet / IRC Style / Optimized for Meshchat / Made by F"
+    version_text = "The Chat Room v1.45b / Powered by Reticulum NomadNet / IRC Style / Optimized for Meshchat / Made by F"
     version_text2 = "This chat is running on a VPS server, powered by RNS v1.0.0 and Nomadnet v.0.8.0."
     version_text3 = "Latest Implementations in v1.3b: AntiSpam Filter and Nickname persistency (Thanks To: Thomas!!)"
     version_text4 = "Latest Implementations in v1.4b: Improved UI with Message splitting on long messages"
     version_text5 = "Latest Implementations in v1.44b: Improved UI, resolved few ui bugs, added Menu Bar on the bottom, added /search command, added 'Read Last 100 Messages', started implementing user settings (for future user preferences implementations: custom nickname colors, multiple chat themes and more...coming soon!)"
+    version_text6 = "Latest Implementations in v1.45b: Added Social Interactions Commands, for full command list: /cmd"
 
 
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text})
@@ -432,6 +456,7 @@ elif cmd == "/version":
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text3})
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text4})
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text5})
+    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text6})
 
 
 elif cmd.startswith("/lastseen "):
@@ -506,7 +531,7 @@ elif cmd.startswith("/search"):
                 "text": "`!` Showing first 10 results. Refine your search for more specific matches. `!`"
             })
 
-
+# PING PONG COMMAND
 elif cmd == "/ping":
     log.append({
         "time": time.strftime("[%H:%M:%S]"),
@@ -514,6 +539,7 @@ elif cmd == "/ping":
         "text": "PONG! (System is up and working!)"
     })
 
+# /e RANDOM EMOJIS COMMAND
 elif cmd == "/e":
     try:
         with open(EMO_DB, "r", encoding="utf-8") as f:
@@ -593,17 +619,259 @@ elif cmd.startswith("/c "):
         try:
             with open(log_file, "w", encoding="utf-8") as f:
                 json.dump(log, f)
-            debug.append(f"Test: Message saved to log.json by '{safe_username}'")
+            debug.append(f"Test: Colored Message succesfully sent! by '{safe_username}'")
         except Exception as e:
-            debug.append(f"Error writing to log.json: {e}")
+            debug.append(f"Error sending colored message: {e}")
     else:
-        debug.append("Test: Color command skipped due to missing message or username.")
+        debug.append("Error: Color command skipped due to missing message or username.")
 
+###### /HI COMMAND #######
+elif cmd.startswith("/hi"):
+    try:
+        parts = cmd.split(" ", 1)
+        user_message = parts[1].strip() if len(parts) > 1 else ""
+        timestamp = time.strftime("[%H:%M:%S]")
+        # Get color code for nickname
+        nickname_color = get_color(safe_username)
+        # Format nickname using your markup style
+        colored_nickname = f"`{nickname_color}{safe_username}`b"
+        # Build message
+        base_text = f"{colored_nickname} has joined The Chat Room!"
+        if user_message:
+            full_text = f" `!{base_text} Message: {user_message} `!"
+        else:
+            full_text = f" `!{base_text} `!"
+        log.append({
+            "time": timestamp,
+            "user": "System",
+            "text": full_text
+        })
+        with open(log_file, "w") as f:
+            json.dump(log, f)
+    except Exception as e:
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": "System",
+            "text": f"`!` Error processing /hi command: {e} `!`"
+        })
+
+###### /BYE COMMAND #######
+elif cmd.startswith("/bye"):
+    try:
+        parts = cmd.split(" ", 1)
+        user_message = parts[1].strip() if len(parts) > 1 else ""
+        timestamp = time.strftime("[%H:%M:%S]")
+        # Get color code for nickname
+        nickname_color = get_color(safe_username)
+        # Format nickname using your markup style
+        colored_nickname = f"`{nickname_color}{safe_username}`b"
+        # Build message
+        base_text = f"{colored_nickname} is leaving The Chat Room!"
+        if user_message:
+            full_text = f" `!{base_text} Message: {user_message} `!"
+        else:
+            full_text = f" `!{base_text} `!"
+        log.append({
+            "time": timestamp,
+            "user": "System",
+            "text": full_text
+        })
+        with open(log_file, "w") as f:
+            json.dump(log, f)
+    except Exception as e:
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": "System",
+            "text": f"`!` Error processing /bye command: {e} `!`"
+        })
+
+###### /quit COMMAND #######
+elif cmd.startswith("/quit"):
+    try:
+        parts = cmd.split(" ", 1)
+        user_message = parts[1].strip() if len(parts) > 1 else ""
+        timestamp = time.strftime("[%H:%M:%S]")
+        # Get color code for nickname
+        nickname_color = get_color(safe_username)
+        # Format nickname using your markup style
+        colored_nickname = f"`{nickname_color}{safe_username}`b"
+        # Build message
+        base_text = f"{colored_nickname} has quit The Chat Room!"
+        if user_message:
+            full_text = f" `!{base_text} Message: {user_message} `!"
+        else:
+            full_text = f" `!{base_text} `!"
+        log.append({
+            "time": timestamp,
+            "user": "System",
+            "text": full_text
+        })
+        with open(log_file, "w") as f:
+            json.dump(log, f)
+    except Exception as e:
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": "System",
+            "text": f"`!` Error processing /quit command: {e} `!`"
+        })
+
+###### /exit COMMAND #######
+elif cmd.startswith("/exit"):
+    try:
+        parts = cmd.split(" ", 1)
+        user_message = parts[1].strip() if len(parts) > 1 else ""
+        timestamp = time.strftime("[%H:%M:%S]")
+        # Get color code for nickname
+        nickname_color = get_color(safe_username)
+        # Format nickname using your markup style
+        colored_nickname = f"`{nickname_color}{safe_username}`b"
+        # Build message
+        base_text = f"{colored_nickname} has left The Chat Room!"
+        if user_message:
+            full_text = f" `!{base_text} Message: {user_message} `!"
+        else:
+            full_text = f" `!{base_text} `!"
+        log.append({
+            "time": timestamp,
+            "user": "System",
+            "text": full_text
+        })
+        with open(log_file, "w") as f:
+            json.dump(log, f)
+    except Exception as e:
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": "System",
+            "text": f"`!` Error processing /exit command: {e} `!`"
+        })
+
+###### /BRB COMMAND #######
+elif cmd.startswith("/brb"):
+    try:
+        parts = cmd.split(" ", 1)
+        user_message = parts[1].strip() if len(parts) > 1 else ""
+        timestamp = time.strftime("[%H:%M:%S]")
+        # Get color code for nickname
+        nickname_color = get_color(safe_username)
+        # Format nickname using your markup style
+        colored_nickname = f"`{nickname_color}{safe_username}`b"
+        # Build message
+        base_text = f"{colored_nickname} has left The Chat Room! I'LL BE RIGHT BACK! BRB!"
+        if user_message:
+            full_text = f" `!{base_text} Message: {user_message} `!"
+        else:
+            full_text = f" `!{base_text} `!"
+        log.append({
+            "time": timestamp,
+            "user": "System",
+            "text": full_text
+        })
+        with open(log_file, "w") as f:
+            json.dump(log, f)
+    except Exception as e:
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": "System",
+            "text": f"`!` Error processing /brb command: {e} `!`"
+        })
+
+###### /lol COMMAND #######
+elif cmd.startswith("/lol"):
+    try:
+        parts = cmd.split(" ", 1)
+        user_message = parts[1].strip() if len(parts) > 1 else ""
+        timestamp = time.strftime("[%H:%M:%S]")
+        # Get color code for nickname
+        nickname_color = get_color(safe_username)
+        # Format nickname using your markup style
+        colored_nickname = f"`{nickname_color}{safe_username}`b"
+        # Build message
+        base_text = f"{colored_nickname} is Laughing Out Loud! LOL! :D "
+        if user_message:
+            full_text = f" `!{base_text} Message: {user_message} `!"
+        else:
+            full_text = f" `!{base_text} `!"
+        log.append({
+            "time": timestamp,
+            "user": "System",
+            "text": full_text
+        })
+        with open(log_file, "w") as f:
+            json.dump(log, f)
+    except Exception as e:
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": "System",
+            "text": f"`!` Error processing /lol command: {e} `!`"
+        })
+
+###### /away COMMAND #######
+elif cmd.startswith("/away"):
+    try:
+        parts = cmd.split(" ", 1)
+        user_message = parts[1].strip() if len(parts) > 1 else ""
+        timestamp = time.strftime("[%H:%M:%S]")
+        # Get color code for nickname
+        nickname_color = get_color(safe_username)
+        # Format nickname using your markup style
+        colored_nickname = f"`{nickname_color}{safe_username}`b"
+        # Build message
+        base_text = f"{colored_nickname} is away."
+        if user_message:
+            full_text = f" `!{base_text} Status: {user_message} `!"
+        else:
+            full_text = f" `!{base_text} `!"
+        log.append({
+            "time": timestamp,
+            "user": "System",
+            "text": full_text
+        })
+        with open(log_file, "w") as f:
+            json.dump(log, f)
+    except Exception as e:
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": "System",
+            "text": f"`!` Error processing /away command: {e} `!`"
+        })
+
+###### /welcome COMMAND #######
+elif cmd.startswith("/welcome"):
+    try:
+        parts = cmd.split(" ", 1)
+        user_message = parts[1].strip() if len(parts) > 1 else ""
+        timestamp = time.strftime("[%H:%M:%S]")
+        # Get color code for nickname
+        nickname_color = get_color(safe_username)
+        # Format nickname using your markup style
+        colored_nickname = f"`{nickname_color}{safe_username}`b"
+        # Build message
+        base_text = f"{colored_nickname} Welcomes "
+        if user_message:
+            full_text = f" `!{base_text} {user_message} `!"
+        else:
+            full_text = f" `!{base_text} everyone! `!"
+        log.append({
+            "time": timestamp,
+            "user": "System",
+            "text": full_text
+        })
+        with open(log_file, "w") as f:
+            json.dump(log, f)
+    except Exception as e:
+        log.append({
+            "time": time.strftime("[%H:%M:%S]"),
+            "user": "System",
+            "text": f"`!` Error processing /welcome command: {e} `!`"
+        })
+
+
+##################### END OF COMMANDS, CONTINUE SCRIPT ##############################
 
 elif raw_username and message and message.lower() != "null":
     sanitized_message = message.replace("`", "")  # remove backticks to prevent formatting issues
 
-    # ?? Spam detection logic
+    # Spam detection logic
     banned_words = ["buy now", "free money", "click here", "subscribe", "win big", "limited offer", "act now"]
     is_spam = any(re.search(pattern, sanitized_message.lower()) for pattern in spam_patterns)
 
@@ -629,18 +897,9 @@ elif raw_username and message and message.lower() != "null":
         except Exception as e:
             debug.append(f" Send error: {e}")
 else:
-    debug.append(" Skipped sending: Missing username or message")
+    debug.append(" Page Reloaded. Idle. Void Message. Waiting for user interactions. For extended commands info digit: /help")
 
 
-# Color system
-colors = [
-    "B900", "B090", "B009", "B099", "B909", "B066", "B933", "B336", "B939",
-    "B660", "B030", "B630", "B363", "B393", "B606", "B060", "B003", "B960", "B999",
-    "B822", "B525", "B255", "B729", "B279", "B297", "B972", "B792", "B227", "B277",
-    "B377", "B773", "B737", "B003", "B111", "B555", "B222", "B088", "B808", "B180"
-]
-def get_color(name):
-    return colors[sum(ord(c) for c in name.lower()) % len(colors)]
 
 # Define helper function to split long messages using MAX CHARS const 
 def split_message(text, max_chars):
@@ -657,46 +916,102 @@ def split_message(text, max_chars):
         lines.append(current_line)
     return lines
 
+# dynamic ui displayed messages adaptation
+def calculate_effective_limit(log, display_limit, max_chars):
+    limit = display_limit
+    for msg in log[-display_limit:]:
+        if len(split_message(msg["text"], max_chars)) > 1:
+            limit -= 1
+    return max(limit, 22) # Minimum of 20 messages shown
+
+effective_limit = calculate_effective_limit(log, DISPLAY_LIMIT, MAX_CHARS)
+
+# mention users def logic on @user message
+def highlight_mentions_in_line(line, known_users):
+    def replacer(match):
+        nickname = match.group(1)
+        if nickname in known_users:
+            color = get_color(nickname)
+            return f"`!@`{color}{nickname}`b`!"
+        else:
+            return f"@{nickname}"  # Leave uncolored
+    return re.sub(r"@(\w+)", replacer, line)
+
+# Load all individual emoticons from the file
+with open(EMO_DB, "r", encoding="utf-8") as f:
+    EMOTICONS = []
+    for line in f:
+        EMOTICONS.extend(line.strip().split())
+# $e catching for emoticons in messages
+def substitute_emoticons_in_line(line):
+    return re.sub(r"\$e", lambda _: random.choice(EMOTICONS), line)
 
 ############################## Output UI template: ######################################
 
 #INTRO TITLE:
-template = "> `!` >>> THE CHAT ROOM! <<<   `F009` Powered by Reticulum / NomadNet - IRC Style - Free Global Chat Room - Optimized for Meshchat - v1.44b `F `!` \n"
+template = f"> `!{message_icon}  THE CHAT ROOM! {message_icon}  `F007` Powered by Reticulum NomadNet - IRC Style - Free Global Chat Room - Optimized for Meshchat v2.x+ - v1.45b `f`!\n"
 template += "-\n"
 
 # TOPIC READING AND RENDERING:
 template += f"`c`B111`Fe0f`!`  ########## Room Topic: {topic_text} `! (Set by: {topic_author}, {topic_data.get('time')}) `!` ########## `!`f`b`a\n"
 template += "-\n"
 
-# CHATLOG READING AND RENDERING:
-for msg in log[-DISPLAY_LIMIT:]:
+# CHATLOG READING AND RENDERING (original): 
+#for msg in log[-effective_limit:]:
+#    color = get_color(msg["user"])
+#    message_lines = split_message(msg["text"], MAX_CHARS)
+#    total_parts = len(message_lines)
+#    for i, line in enumerate(message_lines, start=1):
+#        marker = f"({i}/{total_parts})" if total_parts > 1 else ""
+#        template += f"\\\[{msg['time']} `!` `*` `{color}{msg['user']}:`b `!`*` {line} \n"
+#template += "-"
+
+# Build set of known usernames
+known_users = {msg["user"] for msg in log}
+
+# CHATLOG READING AND RENDERING edit to catch @mentions and $e:
+for msg in log[-effective_limit:]:
     color = get_color(msg["user"])
     message_lines = split_message(msg["text"], MAX_CHARS)
     total_parts = len(message_lines)
     for i, line in enumerate(message_lines, start=1):
         marker = f"({i}/{total_parts})" if total_parts > 1 else ""
-        template += f"\\[{msg['time']} `{color}` `!` `*` <{msg['user']}>`b `! `*` {line} \n"
+
+        if msg["user"] != "System":
+            line = substitute_emoticons_in_line(line)  # Replace $e with random emoticons
+            highlighted_line = highlight_mentions_in_line(line, known_users)  # Highlight @mentions
+        else:
+            highlighted_line = line  # Skip substitutions for System user
+        template += f"\\[{msg['time']} `!` `*` `{color}{msg['user']}:`b `!`*` {highlighted_line} \n"
 template += "-"
+
+
 # sanitize and read name from display_name os env
 safe_display_name = display_name.replace("`", "'")
 
-
-
 # User Interaction Bar (Nick & Messages )
-template += f"\n>`!` {user_icon} Nickname: `Baac`F000`<13|username`{safe_display_name}>`b`F    {message_icon}  Message:  `Baac`<51|message`>`b"
-template += f" `[{send_icon}  Send Message`:/page/index.mu`username|message]`! |`!`[{reload_icon} Reload Page`:/page/index.mu`username]`!\n"
-# template += "-\n"
+template += f"\n>`!` {user_icon} Nickname: `Baac`F000`<12|username`{safe_display_name}>`!`b`[{nickset_icon} `:/page/index.mu`username]`!   {message_icon}  Message: `Baac`<52|message`>`b`!"
+template += f" `!`[{send_icon}  Send Message`:/page/index.mu`username|message]`! | `!`[{reload_icon} Reload`:/page/index.mu`username]`!\n"
 
-# MENUBAR
-template += f"`B317`Faaa` `!` {message_icon}  On Screen Messages: ({DISPLAY_LIMIT}) | {totmsg_icon}  `[Read Last 100`:/page/last100.mu]`  |  {message_icon}  Total Messages: ({len(log)}) | {totmsg_icon}  `[Read Full Chat Log (Slow)`:/page/fullchat.mu]`!   | `!`[{setup_icon}  User Settings  `:/page/index.mu`username]`!`b`f\n"
+
 template += "-\n"
+
+# STATUS BAR (incomplete)
+# if debug:
+#     latest_debug = debug[-1]
+#     template += f">{cmd_icon}  `B115`Fccc`!SYSTEM STATUS:`! {latest_debug}`b`f\n"
+
 # USER COMMANDS
 # template += "\n-\n"
-template += f"`B316`Fe0f` {cmd_icon}  User Commands: /info, /help, /stats, /users, /lastseen <user>, /topic, /search <keyword(s)>, /time, /ping, /version, /e, /c    `b`f\n"
-# template += "-\n"
+template += f"`B216`Fddd` {cmd_icon}  User Commands: /info, /stats, /users, /topic, /search <keyword(s)>, /time, /ping, /version, -------> `!Full Command List: /cmd  `!`b`f\n"
+#template += "-\n"
+
+# MENUBAR
+template += f"`B317`Feee` `!` {message_icon}  Total Messages: ({len(log)}) | {message_icon}  On Screen Messages: ({effective_limit}) | {totmsg_icon}  `[Read Last 100`:/page/last100.mu]`  |  {totmsg_icon}  `[Read Full Chat Log (Slow)`:/page/fullchat.mu]`!  | `!`[{setup_icon}  User Settings  `:/page/index.mu`username]` `!`b`f\n"
+#template += "-\n"
 
 # FOOTER NOTE
-template += f"`B315`F90f`  * Note: For Nickname persistency, press the 'FingerPrint' button on MeshChat (v2.2.0+). To recover your session, press it again. `b`f`"
+#template += f"`B315`F90f` ** Note: For Nickname persistency, press the 'FingerPrint' button on MeshChat (v2.2.0+). To recover your session, press it again.`b`f`\n"
 
 # RENDER UI:
 print(template)
