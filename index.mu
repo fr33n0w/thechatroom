@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 import os, sys, json, time, random, re, sqlite3
 
+######## SYS & FILE PATHS
 DB_PATH = os.path.join(os.path.dirname(__file__), "chatusers.db")
 EMO_DB = os.path.join(os.path.dirname(__file__), "emoticons.txt")
 
-# EDITABLE SETTINGS:
+#########  EDITABLE SETTINGS: ######## 
 MAX_CHARS = 105  # Adjust as needed to split messages after N chars
-DISPLAY_LIMIT = 28 # Adjust how many visible messages you want in the UI
-SYSADMYN = "fr4dm1n@@@" # SET YOUR ADMIN NICKNAME FOR CHAT ADMIN COMMANDS
+DISPLAY_LIMIT = 18 # Adjust how many visible messages you want in the UI
+SYSADMIN = "fr4dm1n@@@" # SET YOUR ADMIN NICKNAME FOR CHAT ADMIN COMMANDS
 
-# UI Emojis:
+######## UI Unicode Emojis: ######## 
 user_icon = "\U0001F464" # "\U0001F464" # "\U0001F465" - "\U0001FAAA"
 message_icon = "\U0001F4AC" 
 msg2_icon = "\u2709\ufe0f"
@@ -22,7 +23,7 @@ nickset_icon = "\U0001F504"
 info_icon = "\u1F6C8"
 stats_icon = "\u1F4DD"
 
-# Antispam filters:
+#########  Antispam filters: ######## 
 spam_patterns = [
     r"buy\s+now",
     r"free\s+money",
@@ -58,10 +59,7 @@ spam_patterns = [
     r"get\s+rich\s+with\s+crypto",
     r"eth[e3]reum\s+promo",
     r"buy\s+crypto\s+now",
-    r"invest\s+in\s+(crypto|bitcoin|ethereum)"
-]
-
-spam_patterns += [
+    r"invest\s+in\s+(crypto|bitcoin|ethereum)",
     r"\bfree\s+(bitcoin|crypto|ethereum)\b",
     r"\bsell\s+(bitcoin|crypto|ethereum)\b",
     r"\bi\s+sell\s+(bitcoin|bitcoins|crypto|ethereum)\b",
@@ -70,10 +68,7 @@ spam_patterns += [
     r"\bmake\s+money\s+(with|from)\s+(bitcoin|crypto|ethereum)\b",
     r"\binvest\s+(in|into)\s+(bitcoin|crypto|ethereum)\b",
     r"\bbitcoin\s+(promo|deal|offer|discount)\b",
-    r"\bcrypto\s+(promo|deal|offer|discount)\b"
-]
-
-spam_patterns += [
+    r"\bcrypto\s+(promo|deal|offer|discount)\b",
     r"\bfree\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b",
     r"\b(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\s+for\s+you\b",
     r"\bsell\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b",
@@ -81,10 +76,7 @@ spam_patterns += [
     r"\bi\s+sell\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b",
     r"\bget\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b",
     r"\bmake\s+money\s+(with|from)\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b",
-    r"\binvest\s+(in|into)\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b"
-]
-
-spam_patterns += [
+    r"\binvest\s+(in|into)\s+(bitcoin|bitcoins|coin|coins|crypto|tokens|ethereum)\b",
     r"(?:\W|^)(bitcoin|bitcoins|crypto|ethereum|tokens|coins)(?:\W|$)",  # matches with punctuation or boundaries
     r"\b(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\s+for\s+(free|you)\b",
     r"\bfree\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b",
@@ -92,13 +84,8 @@ spam_patterns += [
     r"\bmake\s+money\s+(with|from)\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b"
 ]
 
-# Color system
-colors = [
-    "B900", "B090", "B009", "B099", "B909", "B066", "B933", "B336", "B939",
-    "B660", "B030", "B630", "B363", "B393", "B606", "B060", "B003", "B960", "B999",
-    "B822", "B525", "B255", "B729", "B279", "B297", "B972", "B792", "B227", "B277",
-    "B377", "B773", "B737", "B003", "B111", "B555", "B222", "B088", "B808", "B180"
-]
+################# ##### Color system ############# ######### 
+colors = [ "B900", "B090", "B009", "B099", "B909", "B066", "B933", "B336", "B939", "B660", "B030", "B630", "B363", "B393", "B606", "B060", "B003", "B960", "B999", "B822", "B525", "B255", "B729", "B279", "B297", "B972", "B792", "B227", "B277", "B377", "B773", "B737", "B003", "B111", "B555", "B222", "B088", "B808", "B180" ]
 def get_color(name):
     return colors[sum(ord(c) for c in name.lower()) % len(colors)]
 
@@ -255,10 +242,11 @@ except Exception as e:
     debug.append(f"Failed to load log: {e}")
 
 # USER COMMANDS LOGIC:
-
 cmd = message.strip().lower()
 
-if safe_username == SYSADMYN and cmd.startswith("/clear"):
+
+##### ADMIN COMMANDS #####
+if safe_username == SYSADMIN and cmd.startswith("/clear"):
     parts = cmd.split()
 
     if len(parts) == 1:
@@ -298,7 +286,7 @@ if safe_username == SYSADMYN and cmd.startswith("/clear"):
     except Exception as e:
         debug.append(f"Clear command error: {e}")
 
-elif safe_username == SYSADMYN and cmd == "/clearall":
+elif safe_username == SYSADMIN and cmd == "/clearall":
     if log:
         log.clear()
         debug.append("All messages cleared by admin.")
@@ -311,6 +299,11 @@ elif safe_username == SYSADMYN and cmd == "/clearall":
     else:
         debug.append("Log already empty. Nothing to clear.")
 
+
+
+########## CHAT USERS COMMANDS #########
+
+#### STATS COMMAND ####
 elif cmd == "/stats":
     user_stats = {}
     user_set = set()
@@ -385,7 +378,7 @@ elif cmd == "/cmd":
         "--------------------------------------",
         f"`!` {cmd_icon} USER STATUS INTERACTIONS COMMANDS`!`",
         "`!` /hi, /bye, /brb, /lol, /exit, /quit, /away, /back `!`",
-        "`!` Commands Usage Example:  /hi Hello World! `! (Syntax is valid for all the above commands!)",
+        "`!` Commands Usage Example:  /hi OR /hi Hello World! `! (Syntax is valid for all the above commands!)",
         "--------------------------------------",
         "`!` END OF COMMAND LIST: `[RELOAD THE PAGE TO GO BACK TO THE CHATROOM`:/page/index.mu`username]` `! ",
 
@@ -397,6 +390,7 @@ elif cmd == "/cmd":
             "text": line
         })
 
+######## INFO COMMAND #########
 elif cmd == "/info":
     info_lines = [
         "`!` The Chat Room Info - Overview - Usage - Commands - Disclaimer - README! :) `!`",
@@ -461,13 +455,14 @@ elif cmd == "/version":
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text5})
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text6})
 
-
+######## LASTSEEN COMMAND ########
 elif cmd.startswith("/lastseen "):
     target_user = cmd[10:].strip()
     last = next((msg for msg in reversed(log) if msg["user"] == target_user), None)
     seen_text = f"Last seen {target_user} at {last['time']}: {last['text']}" if last else f"No record of user '{target_user}'."
     log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": seen_text})
 
+######## TOPIC COMMAND ######## 
 elif cmd.startswith("/topic "):
     new_topic = message[7:].replace("`", "").strip()
     if new_topic:
@@ -494,6 +489,7 @@ elif cmd == "/topic":
         "text": f"Current Topic: {topic_text} (set by {topic_author} on {topic_data.get('time')})"
     })
 
+######## SEARCH COMMAND ######## 
 elif cmd.startswith("/search"):
     search_input = message[8:].strip().lower()
 
@@ -534,7 +530,7 @@ elif cmd.startswith("/search"):
                 "text": "`!` Showing first 10 results. Refine your search for more specific matches. `!`"
             })
 
-# PING PONG COMMAND
+######## PING COMMAND ######## 
 elif cmd == "/ping":
     log.append({
         "time": time.strftime("[%H:%M:%S]"),
@@ -542,7 +538,7 @@ elif cmd == "/ping":
         "text": "PONG! (System is up and working!)"
     })
 
-# /e RANDOM EMOJIS COMMAND
+#########  /e RANDOM EMOJIS COMMAND ######## 
 elif cmd == "/e":
     try:
         with open(EMO_DB, "r", encoding="utf-8") as f:
@@ -580,8 +576,7 @@ elif cmd == "/e":
         })
         debug.append(f" Emoji command error: {e}")
 
-##### COLOR /c COMMAND ######
-
+######## ##### COLOR /c COMMAND ######## ######
 elif cmd.startswith("/c "):
     user_message = message[3:].strip().replace("`", "")  # Remove backticks to avoid formatting issues
 
@@ -905,7 +900,7 @@ elif cmd.startswith("/welcome"):
 elif raw_username and message and message.lower() != "null":
     sanitized_message = message.replace("`", "")  # remove backticks to prevent formatting issues
 
-    # Spam detection logic
+######### Spam detection logic ######## 
     banned_words = ["buy now", "free money", "click here", "subscribe", "win big", "limited offer", "act now"]
     is_spam = any(re.search(pattern, sanitized_message.lower()) for pattern in spam_patterns)
 
@@ -935,7 +930,7 @@ else:
 
 
 
-# Define helper function to split long messages using MAX CHARS const 
+#########  Helper function to split long messages using MAX CHARS ######## 
 def split_message(text, max_chars):
     words = text.split()
     lines = []
@@ -950,7 +945,7 @@ def split_message(text, max_chars):
         lines.append(current_line)
     return lines
 
-# dynamic ui displayed messages adaptation
+#########  dynamic ui displayed messages adaptation ######## 
 def calculate_effective_limit(log, display_limit, max_chars):
     limit = display_limit
     for msg in log[-display_limit:]:
@@ -960,7 +955,7 @@ def calculate_effective_limit(log, display_limit, max_chars):
 
 effective_limit = calculate_effective_limit(log, DISPLAY_LIMIT, MAX_CHARS)
 
-# mention users def logic on @user message
+#########  mention users def logic on @user message ######## 
 def highlight_mentions_in_line(line, known_users):
     def replacer(match):
         nickname = match.group(1)
@@ -971,7 +966,7 @@ def highlight_mentions_in_line(line, known_users):
             return f"@{nickname}"  # Leave uncolored
     return re.sub(r"@(\w+)", replacer, line)
 
-# Load all individual emoticons from the file
+######## $E FOR EMOTICONS ######## 
 with open(EMO_DB, "r", encoding="utf-8") as f:
     EMOTICONS = []
     for line in f:
@@ -1052,4 +1047,4 @@ template += f"`B317`Feee` `!` {message_icon}  Total Messages: ({len(log)}) | {me
 # RENDER UI:
 print(template)
 
-############################## END OF UI Template: ######################################
+############################## END OF UI Template: #####################################
