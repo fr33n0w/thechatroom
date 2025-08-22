@@ -6,8 +6,9 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "chatusers.db")
 EMO_DB = os.path.join(os.path.dirname(__file__), "emoticons.txt")
 
 #########  EDITABLE SETTINGS: ######## 
-MAX_CHARS = 105  # Adjust as needed to split messages after N chars
-DISPLAY_LIMIT = 18 # Adjust how many visible messages you want in the UI
+MAX_CHARS = 108  # Adjust as needed to split messages after N chars
+MAX_LINES = 28   # Max lines on screen
+DISPLAY_LIMIT = 27 # Adjust how many visible messages you want in the UI (obsolete)
 SYSADMIN = "fr4dm1n@@@" # SET YOUR ADMIN NICKNAME FOR CHAT ADMIN COMMANDS
 
 ######## UI Unicode Emojis: ######## 
@@ -250,7 +251,7 @@ if safe_username == SYSADMIN and cmd.startswith("/clear"):
     parts = cmd.split()
 
     if len(parts) == 1:
-        # /clear → remove last message
+        # /clear ? remove last message
         if log:
             removed = log.pop()
             debug.append(f"Removed last message: <{removed['user']}> {removed['text']}")
@@ -258,7 +259,7 @@ if safe_username == SYSADMIN and cmd.startswith("/clear"):
             debug.append("No messages to clear.")
 
     elif len(parts) == 2 and parts[1].isdigit():
-        # /clear N → remove last N messages
+        # /clear N ? remove last N messages
         count = int(parts[1])
         removed_count = 0
         while log and removed_count < count:
@@ -268,7 +269,7 @@ if safe_username == SYSADMIN and cmd.startswith("/clear"):
         debug.append(f"Cleared last {removed_count} messages.")
 
     elif len(parts) == 3 and parts[1] == "user":
-        # /clear user NICKNAME → remove all messages from that user
+        # /clear user NICKNAME ? remove all messages from that user
         target_user = parts[2]
         original_len = len(log)
         log[:] = [msg for msg in log if msg.get("user") != target_user]
@@ -898,7 +899,7 @@ elif cmd.startswith("/welcome"):
 ##################### END OF COMMANDS, CONTINUE SCRIPT ##############################
 
 elif raw_username and message and message.lower() != "null":
-    sanitized_message = message.replace("`", "")  # remove backticks to prevent formatting issues
+    sanitized_message = message.replace("`", "").replace("[", "")  # remove backticks and [ to prevent formatting issues
 
 ######### Spam detection logic ######## 
     banned_words = ["buy now", "free money", "click here", "subscribe", "win big", "limited offer", "act now"]
@@ -946,14 +947,32 @@ def split_message(text, max_chars):
     return lines
 
 #########  dynamic ui displayed messages adaptation ######## 
-def calculate_effective_limit(log, display_limit, max_chars):
-    limit = display_limit
-    for msg in log[-display_limit:]:
-        if len(split_message(msg["text"], max_chars)) > 1:
-            limit -= 1
-    return max(limit, 22) # Minimum of 20 messages shown
+#def calculate_effective_limit(log, display_limit, max_chars):
+#    limit = display_limit
+#    for msg in log[-display_limit:]:
+#        if len(split_message(msg["text"], max_chars)) > 1:
+#            limit -= 1
+#    return max(limit, 20) # Minimum of 20 messages shown
+#
+#effective_limit = calculate_effective_limit(log, DISPLAY_LIMIT, MAX_CHARS)
 
-effective_limit = calculate_effective_limit(log, DISPLAY_LIMIT, MAX_CHARS)
+##new:
+def calculate_effective_limit(log, max_lines, max_chars):
+    total_lines = 0
+    effective_limit = 0
+
+    for msg in reversed(log):
+        lines = len(split_message(msg["text"], max_chars))
+        if total_lines + lines > max_lines:
+            break
+        total_lines += lines
+        effective_limit += 1
+
+    return max(effective_limit, 1), total_lines
+
+effective_limit, total_lines = calculate_effective_limit(log, MAX_LINES, MAX_CHARS)
+
+
 
 #########  mention users def logic on @user message ######## 
 def highlight_mentions_in_line(line, known_users):
@@ -1011,7 +1030,7 @@ for msg in log[-effective_limit:]:
             highlighted_line = highlight_mentions_in_line(line, known_users)  # Highlight @mentions
         else:
             highlighted_line = line  # Skip substitutions for System user
-        template += f"`Ffff` \\{msg['time']} `*` `{color}{msg['user']}:`b `*` {highlighted_line} \n"
+        template += f"`Ffff` \\{msg['time']} `*` `{color}<{msg['user']}>`b `*` {highlighted_line} \n"
 template += "-"
 
 
@@ -1038,7 +1057,7 @@ template += f"`B216`Fddd` {cmd_icon}  User Commands: /info, /stats, /users, /top
 #template += "-\n"
 
 # MENUBAR
-template += f"`B317`Feee` `!` {message_icon}  Total Messages: ({len(log)}) | {message_icon}  On Screen Messages: ({effective_limit}) | {totmsg_icon}  `[Read Last 100`:/page/last100.mu]`  |  {totmsg_icon}  `[Read Full Chat Log (Slow)`:/page/fullchat.mu]`!  | `!`[{setup_icon}  User Settings  `:/page/index.mu`username]` `!`b`f\n"
+template += f"`B317`Feee` `!` {message_icon}  Total Messages: ({len(log)}) | {message_icon}  On Screen Messages: ({total_lines}) | {totmsg_icon}  `[Read Last 100`:/page/last100.mu]`  |  {totmsg_icon}  `[Read Full Chat Log (Slow)`:/page/fullchat.mu]`!  | `!`[{setup_icon}  User Settings  `:/page/index.mu`username]` `!`b`f"
 #template += "-\n"
 
 # FOOTER NOTE
