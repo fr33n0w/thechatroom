@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 import os, sys, json, time, random, re, sqlite3
 
-######## SYS & FILE PATHS
+######## SYS & FILE PATHS ########
 DB_PATH = os.path.join(os.path.dirname(__file__), "chatusers.db")
 EMO_DB = os.path.join(os.path.dirname(__file__), "emoticons.txt")
 
 #########  EDITABLE SETTINGS: ######## 
 MAX_CHARS = 108  # Adjust as needed to split messages after N chars
 MAX_LINES = 28   # Max lines on screen
-DISPLAY_LIMIT = 27 # Adjust how many visible messages you want in the UI (obsolete)
-SYSADMIN = "fr4dm1n@@@" # SET YOUR ADMIN NICKNAME FOR CHAT ADMIN COMMANDS
+SYSADMIN = "YourSysAdminNickname" # SET YOUR ADMIN NICKNAME FOR CHAT ADMIN COMMANDS
 
 ######## UI Unicode Emojis: ######## 
 user_icon = "\U0001F464" # "\U0001F464" # "\U0001F465" - "\U0001FAAA"
@@ -85,13 +84,13 @@ spam_patterns = [
     r"\bmake\s+money\s+(with|from)\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b"
 ]
 
-################# ##### Color system ############# ######### 
+################# Nickname AutoColor System ############# ######### 
 colors = [ "B900", "B090", "B009", "B099", "B909", "B066", "B933", "B336", "B939", "B660", "B030", "B630", "B363", "B393", "B606", "B060", "B003", "B960", "B999", "B822", "B525", "B255", "B729", "B279", "B297", "B972", "B792", "B227", "B277", "B377", "B773", "B737", "B003", "B111", "B555", "B222", "B088", "B808", "B180" ]
 def get_color(name):
     return colors[sum(ord(c) for c in name.lower()) % len(colors)]
 
 
-# Recover input from environment variables
+######### Recover input from os environment variables ########
 def recover_input(key_suffix):
     for k, v in os.environ.items():
         if k.lower().endswith(key_suffix):
@@ -112,7 +111,7 @@ if not message and len(sys.argv) > 2:
 if not dest and len(sys.argv) > 3:
     dest = sys.argv[3].strip()
 
-# Extract hash code from remote identity and LXMF address
+# Extract hash code from remote identity and LXMF address, if sent by the user with the fingerprint button
 hash_code = remote_identity[-4:] if remote_identity else ""
 dest_code = dest[-4:] if dest else ""
 
@@ -120,11 +119,11 @@ dest_code = dest[-4:] if dest else ""
 if nickname:
     display_name = nickname
 elif dest:
-    display_name = f"Guest_{dest_code}"
+    display_name = f"Guest_{dest_code}" # temporary nickname on first fingerprint usage
 else:
-    display_name = "Guest"
+    display_name = "Guest" # default nickname on missing fingerprint 
 
-# os env print for debug test
+# os env print for debug test , commented, can be removed if unused
 #print("> Meshchat Environment Variables:\n")
 #for key, value in os.environ.items():
 #   print(f"{key} = {value}")
@@ -209,6 +208,7 @@ save_user_to_db(remote_identity, dest, display_name)
 
 # -----------------------------------------------
 
+######## nickname input sanitization ########
 safe_username = (
     raw_username.replace("`", "").replace("<", "").replace(">", "")
     .replace("\n", "").replace("\r", "").replace('"', "").replace("'", "")
@@ -220,6 +220,7 @@ safe_username = (
     .replace("$", "").replace(" ", "").strip() or "Guest"
 )
 
+######## reading chatroom topic from file or set a default if missing ########
 topic_file = os.path.join(os.path.dirname(__file__), "topic.json")
 try:
     with open(topic_file, "r") as tf:
@@ -242,9 +243,8 @@ except Exception as e:
     log = []
     debug.append(f"Failed to load log: {e}")
 
-# USER COMMANDS LOGIC:
+######################### USER COMMANDS LOGIC: ########################
 cmd = message.strip().lower()
-
 
 ##### ADMIN COMMANDS #####
 if safe_username == SYSADMIN and cmd.startswith("/clear"):
@@ -302,7 +302,7 @@ elif safe_username == SYSADMIN and cmd == "/clearall":
 
 
 
-########## CHAT USERS COMMANDS #########
+################## CHAT USERS COMMANDS #################
 
 #### STATS COMMAND ####
 elif cmd == "/stats":
@@ -447,7 +447,8 @@ elif cmd == "/version":
     version_text3 = "Latest Implementations in v1.3b: AntiSpam Filter and Nickname persistency (Thanks To: Thomas!!)"
     version_text4 = "Latest Implementations in v1.4b: Improved UI with Message splitting on long messages"
     version_text5 = "Latest Implementations in v1.44b: Improved UI, resolved few ui bugs, added Menu Bar on the bottom, added /search command, added 'Read Last 100 Messages', started implementing user settings (for future user preferences implementations: custom nickname colors, multiple chat themes and more...coming soon!)"
-    version_text6 = "Latest Implementations in v1.45b: Added Social Interactions Commands, for full command list: /cmd \n Improved UI and readability"
+    version_text6 = "Latest Implementations in v1.45b: Added Social Interactions Commands, for full command list: /cmd \n Improved UI and readability\n"
+    version_text7 = "Get The ChatRoom on: https://github.com/fr33n0w/thechatroom/"
 
     log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text})
     log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text2})
@@ -455,6 +456,7 @@ elif cmd == "/version":
     log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text4})
     log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text5})
     log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text6})
+    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text7})
 
 ######## LASTSEEN COMMAND ########
 elif cmd.startswith("/lastseen "):
@@ -896,17 +898,17 @@ elif cmd.startswith("/welcome"):
         })
 
 
-##################### END OF COMMANDS, CONTINUE SCRIPT ##############################
+##################### END OF COMMANDS, CONTINUE SCRIPT PAGE ##############################
 
 elif raw_username and message and message.lower() != "null":
-    sanitized_message = message.replace("`", "").replace("[", "")  # remove backticks and [ to prevent formatting issues
+    sanitized_message = message.replace("`", "").replace("[", "")  # remove backticks and [ to prevent formatting issues or code injection
 
 ######### Spam detection logic ######## 
     banned_words = ["buy now", "free money", "click here", "subscribe", "win big", "limited offer", "act now"]
     is_spam = any(re.search(pattern, sanitized_message.lower()) for pattern in spam_patterns)
 
     if is_spam:
-        # ?? Don't write to JSON, just log the system message
+        # Don't write to JSON, just log the system message
         log.append({
             "time": time.strftime("[%H:%M]"),
             "user": "System",
@@ -914,7 +916,7 @@ elif raw_username and message and message.lower() != "null":
         })
         debug.append(f" Spam blocked from '{safe_username}'")
     else:
-        # ? Normal message flow
+        # Normal message flow
         log.append({
             "time": time.strftime("[%H:%M]"),
             "user": safe_username,
@@ -946,17 +948,7 @@ def split_message(text, max_chars):
         lines.append(current_line)
     return lines
 
-#########  dynamic ui displayed messages adaptation ######## 
-#def calculate_effective_limit(log, display_limit, max_chars):
-#    limit = display_limit
-#    for msg in log[-display_limit:]:
-#        if len(split_message(msg["text"], max_chars)) > 1:
-#            limit -= 1
-#    return max(limit, 20) # Minimum of 20 messages shown
-#
-#effective_limit = calculate_effective_limit(log, DISPLAY_LIMIT, MAX_CHARS)
-
-##new:
+#########  dynamic ui display messages adaptation ######## 
 def calculate_effective_limit(log, max_lines, max_chars):
     total_lines = 0
     effective_limit = 0
@@ -1004,16 +996,6 @@ template += "-\n"
 template += f"`c`B000`Ff2e`!`  ########## Room Topic: {topic_text} `! (Set by: {topic_author}, {topic_data.get('time')}) `!` ########## `!`f`b`a\n"
 template += "-\n"
 
-# CHATLOG READING AND RENDERING (original): 
-#for msg in log[-effective_limit:]:
-#    color = get_color(msg["user"])
-#    message_lines = split_message(msg["text"], MAX_CHARS)
-#    total_parts = len(message_lines)
-#    for i, line in enumerate(message_lines, start=1):
-#        marker = f"({i}/{total_parts})" if total_parts > 1 else ""
-#        template += f"\\\[{msg['time']} `!` `*` `{color}{msg['user']}:`b `!`*` {line} \n"
-#template += "-"
-
 # Build set of known usernames
 known_users = {msg["user"] for msg in log}
 
@@ -1038,11 +1020,8 @@ template += "-"
 safe_display_name = display_name.replace("`", "'")
 
 # User Interaction Bar (Nick & Messages )
-# template += f"\n`Ffff`! {user_icon} Nickname: `Bddf`F000`<12|username`{safe_display_name}>`!`B000`Ffff`[{nickset_icon} `:/page/index.mu`username]`! | {message_icon}  Message: `Bddf`F000`<52|message`>`b`!"
-# template += f" `!`Ffff`[{send_icon} Send Message`:/page/index.mu`username|message]`! | `!`[{reload_icon} Reload`:/page/index.mu`username]`!\n"
 template += f"\n>`!` {user_icon} Nickname: `Baac`F000`<12|username`{safe_display_name}>`!`b`[{nickset_icon} `:/page/index.mu`username]`!   {message_icon}  Message: `Baac`<52|message`>`b`!"
 template += f" `!`[{send_icon}  Send Message`:/page/index.mu`username|message]`! | `!`[{reload_icon} Reload`:/page/index.mu`username]`!\n"
-
 
 template += "-\n"
 
