@@ -318,13 +318,13 @@ elif cmd == "/stats":
     top_users = sorted(user_stats.items(), key=lambda x: x[1], reverse=True)
 
     # Prepare lines
-    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": "`!` Stats Report: `!` "})
-    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": f"`!` Total messages: {total_messages} `!` "})
-    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": f"`!` Total users: {total_users} `!` "})
+    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": "`!` Stats Report: `!` "})
+    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": f"`!` Total messages: {total_messages} `!` "})
+    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": f"`!` Total users: {total_users} `!` "})
     
     # Combine top chatters in one line
     top_line = "`!` Top chatters: `!` " + " , ".join([f"`!` {user} ({count} msg) `!`" for user, count in top_users[:5]])
-    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": top_line})
+    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": top_line})
 
 ############ /users COMMAND ##############
 elif cmd == "/users":
@@ -338,7 +338,7 @@ elif cmd == "/users":
 
     # Header line
     log.append({
-        "time": time.strftime("[%H:%M:%S]"),
+        "time": time.strftime("[%H:%M]"),
         "user": "System",
         "text": f"`!` Active Users List and Stats, Total Users: ({total_users}) `! "
     })
@@ -347,7 +347,7 @@ elif cmd == "/users":
     for i in range(0, total_users, 7):
         chunk = ", ".join(f"`!` {user} `!({count}msg)" for user, count in sorted_users[i:i+7])
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": chunk
         })
@@ -386,7 +386,7 @@ elif cmd == "/cmd":
     ]
     for line in help_lines:
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": line
         })
@@ -424,7 +424,7 @@ elif cmd == "/info":
     ]
     for line in info_lines:
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": line
         })
@@ -438,7 +438,7 @@ elif cmd == "/time":
     except:
         user_time = "(Local time not available)"
     time_text = f"Server time: {server_time} // User time (Naples): {user_time}"
-    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": time_text})
+    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": time_text})
 
 ############ VERSION COMMAND ##########
 elif cmd == "/version":
@@ -449,19 +449,19 @@ elif cmd == "/version":
     version_text5 = "Latest Implementations in v1.44b: Improved UI, resolved few ui bugs, added Menu Bar on the bottom, added /search command, added 'Read Last 100 Messages', started implementing user settings (for future user preferences implementations: custom nickname colors, multiple chat themes and more...coming soon!)"
     version_text6 = "Latest Implementations in v1.45b: Added Social Interactions Commands, for full command list: /cmd \n Improved UI and readability"
 
-    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text})
-    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text2})
-    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text3})
-    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text4})
-    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text5})
-    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": version_text6})
+    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text})
+    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text2})
+    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text3})
+    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text4})
+    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text5})
+    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text6})
 
 ######## LASTSEEN COMMAND ########
 elif cmd.startswith("/lastseen "):
     target_user = cmd[10:].strip()
     last = next((msg for msg in reversed(log) if msg["user"] == target_user), None)
     seen_text = f"Last seen {target_user} at {last['time']}: {last['text']}" if last else f"No record of user '{target_user}'."
-    log.append({"time": time.strftime("[%H:%M:%S]"), "user": "System", "text": seen_text})
+    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": seen_text})
 
 ######## TOPIC COMMAND ######## 
 elif cmd.startswith("/topic "):
@@ -474,7 +474,7 @@ elif cmd.startswith("/topic "):
             with open(topic_file, "w") as tf:
                 json.dump(topic_data, tf)
             log.append({
-                "time": time.strftime("[%H:%M:%S]"),
+                "time": time.strftime("[%H:%M]"),
                 "user": "System",
                 "text": f"Topic set by {safe_username} on {timestamp}: {trimmed_topic} `!`[<Reload Page!>`:/page/index.mu`username]`!"
             })
@@ -485,7 +485,7 @@ elif cmd.startswith("/topic "):
 
 elif cmd == "/topic":
     log.append({
-        "time": time.strftime("[%H:%M:%S]"),
+        "time": time.strftime("[%H:%M]"),
         "user": "System",
         "text": f"Current Topic: {topic_text} (set by {topic_author} on {topic_data.get('time')})"
     })
@@ -496,7 +496,7 @@ elif cmd.startswith("/search"):
 
     if not search_input:
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": "`!` Error! Command Usage: /search <keywords> - Please provide one or more keywords! `!`"
         })
@@ -512,21 +512,21 @@ elif cmd.startswith("/search"):
                 matches.append(msg)
 
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": f"`!` Search Results for: '{search_input}' - {len(matches)} match(es) found. `!`"
         })
 
         for match in matches[:10]:
             log.append({
-                "time": time.strftime("[%H:%M:%S]"),
+                "time": time.strftime("[%H:%M]"),
                 "user": "System",
                 "text": f"[{match.get('time', '??')}] <{match.get('user', '??')}> {match.get('text', '')}"
             })
 
         if len(matches) > 10:
             log.append({
-                "time": time.strftime("[%H:%M:%S]"),
+                "time": time.strftime("[%H:%M]"),
                 "user": "System",
                 "text": "`!` Showing first 10 results. Refine your search for more specific matches. `!`"
             })
@@ -534,7 +534,7 @@ elif cmd.startswith("/search"):
 ######## PING COMMAND ######## 
 elif cmd == "/ping":
     log.append({
-        "time": time.strftime("[%H:%M:%S]"),
+        "time": time.strftime("[%H:%M]"),
         "user": "System",
         "text": "PONG! (System is up and working!)"
     })
@@ -551,7 +551,7 @@ elif cmd == "/e":
 
             # Treat emoji as a normal message
             log.append({
-                "time": time.strftime("[%H:%M:%S]"),
+                "time": time.strftime("[%H:%M]"),
                 "user": safe_username,
                 "text": chosen
             })
@@ -564,14 +564,14 @@ elif cmd == "/e":
                 debug.append(f" Emoji send error: {e}")
         else:
             log.append({
-                "time": time.strftime("[%H:%M:%S]"),
+                "time": time.strftime("[%H:%M]"),
                 "user": "System",
                 "text": "`!` Emoji list is empty or username missing. `!`"
             })
             debug.append(" Emoji command skipped: missing emoji or username.")
     except Exception as e:
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": f"`!` Error loading emojis: {e} `!`"
         })
@@ -607,7 +607,7 @@ elif cmd.startswith("/c "):
 
         # Create log entry
         entry = {
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": safe_username,
             "text": colorful_text
         }
@@ -629,7 +629,7 @@ elif cmd.startswith("/hi"):
     try:
         parts = cmd.split(" ", 1)
         user_message = parts[1].strip() if len(parts) > 1 else ""
-        timestamp = time.strftime("[%H:%M:%S]")
+        timestamp = time.strftime("[%H:%M]")
         # Get color code for nickname
         nickname_color = get_color(safe_username)
         # Format nickname using your markup style
@@ -649,7 +649,7 @@ elif cmd.startswith("/hi"):
             json.dump(log, f)
     except Exception as e:
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": f"`!` Error processing /hi command: {e} `!`"
         })
@@ -659,7 +659,7 @@ elif cmd.startswith("/bye"):
     try:
         parts = cmd.split(" ", 1)
         user_message = parts[1].strip() if len(parts) > 1 else ""
-        timestamp = time.strftime("[%H:%M:%S]")
+        timestamp = time.strftime("[%H:%M]")
         # Get color code for nickname
         nickname_color = get_color(safe_username)
         # Format nickname using your markup style
@@ -679,7 +679,7 @@ elif cmd.startswith("/bye"):
             json.dump(log, f)
     except Exception as e:
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": f"`!` Error processing /bye command: {e} `!`"
         })
@@ -689,7 +689,7 @@ elif cmd.startswith("/quit"):
     try:
         parts = cmd.split(" ", 1)
         user_message = parts[1].strip() if len(parts) > 1 else ""
-        timestamp = time.strftime("[%H:%M:%S]")
+        timestamp = time.strftime("[%H:%M]")
         # Get color code for nickname
         nickname_color = get_color(safe_username)
         # Format nickname using your markup style
@@ -709,7 +709,7 @@ elif cmd.startswith("/quit"):
             json.dump(log, f)
     except Exception as e:
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": f"`!` Error processing /quit command: {e} `!`"
         })
@@ -719,7 +719,7 @@ elif cmd.startswith("/exit"):
     try:
         parts = cmd.split(" ", 1)
         user_message = parts[1].strip() if len(parts) > 1 else ""
-        timestamp = time.strftime("[%H:%M:%S]")
+        timestamp = time.strftime("[%H:%M]")
         # Get color code for nickname
         nickname_color = get_color(safe_username)
         # Format nickname using your markup style
@@ -739,7 +739,7 @@ elif cmd.startswith("/exit"):
             json.dump(log, f)
     except Exception as e:
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": f"`!` Error processing /exit command: {e} `!`"
         })
@@ -749,7 +749,7 @@ elif cmd.startswith("/brb"):
     try:
         parts = cmd.split(" ", 1)
         user_message = parts[1].strip() if len(parts) > 1 else ""
-        timestamp = time.strftime("[%H:%M:%S]")
+        timestamp = time.strftime("[%H:%M]")
         # Get color code for nickname
         nickname_color = get_color(safe_username)
         # Format nickname using your markup style
@@ -769,7 +769,7 @@ elif cmd.startswith("/brb"):
             json.dump(log, f)
     except Exception as e:
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": f"`!` Error processing /brb command: {e} `!`"
         })
@@ -779,7 +779,7 @@ elif cmd.startswith("/lol"):
     try:
         parts = cmd.split(" ", 1)
         user_message = parts[1].strip() if len(parts) > 1 else ""
-        timestamp = time.strftime("[%H:%M:%S]")
+        timestamp = time.strftime("[%H:%M]")
         # Get color code for nickname
         nickname_color = get_color(safe_username)
         # Format nickname using your markup style
@@ -799,7 +799,7 @@ elif cmd.startswith("/lol"):
             json.dump(log, f)
     except Exception as e:
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": f"`!` Error processing /lol command: {e} `!`"
         })
@@ -809,7 +809,7 @@ elif cmd.startswith("/away"):
     try:
         parts = cmd.split(" ", 1)
         user_message = parts[1].strip() if len(parts) > 1 else ""
-        timestamp = time.strftime("[%H:%M:%S]")
+        timestamp = time.strftime("[%H:%M]")
         # Get color code for nickname
         nickname_color = get_color(safe_username)
         # Format nickname using your markup style
@@ -829,7 +829,7 @@ elif cmd.startswith("/away"):
             json.dump(log, f)
     except Exception as e:
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": f"`!` Error processing /away command: {e} `!`"
         })
@@ -839,7 +839,7 @@ elif cmd.startswith("/back"):
     try:
         parts = cmd.split(" ", 1)
         user_message = parts[1].strip() if len(parts) > 1 else ""
-        timestamp = time.strftime("[%H:%M:%S]")
+        timestamp = time.strftime("[%H:%M]")
         # Get color code for nickname
         nickname_color = get_color(safe_username)
         # Format nickname using your markup style
@@ -849,7 +849,7 @@ elif cmd.startswith("/back"):
         if user_message:
             full_text = f" `!{base_text} {user_message} `!"
         else:
-            full_text = f" `!{base_text} everyone! `!"
+            full_text = f" `!{base_text} `!"
         log.append({
             "time": timestamp,
             "user": "System",
@@ -859,7 +859,7 @@ elif cmd.startswith("/back"):
             json.dump(log, f)
     except Exception as e:
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": f"`!` Error processing /back command: {e} `!`"
         })
@@ -870,7 +870,7 @@ elif cmd.startswith("/welcome"):
     try:
         parts = cmd.split(" ", 1)
         user_message = parts[1].strip() if len(parts) > 1 else ""
-        timestamp = time.strftime("[%H:%M:%S]")
+        timestamp = time.strftime("[%H:%M]")
         # Get color code for nickname
         nickname_color = get_color(safe_username)
         # Format nickname using your markup style
@@ -890,7 +890,7 @@ elif cmd.startswith("/welcome"):
             json.dump(log, f)
     except Exception as e:
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": f"`!` Error processing /welcome command: {e} `!`"
         })
@@ -908,7 +908,7 @@ elif raw_username and message and message.lower() != "null":
     if is_spam:
         # ?? Don't write to JSON, just log the system message
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": "System",
             "text": "Spam Detected! Message Blocked!"
         })
@@ -916,7 +916,7 @@ elif raw_username and message and message.lower() != "null":
     else:
         # ? Normal message flow
         log.append({
-            "time": time.strftime("[%H:%M:%S]"),
+            "time": time.strftime("[%H:%M]"),
             "user": safe_username,
             "text": sanitized_message
         })
