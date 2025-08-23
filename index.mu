@@ -1,14 +1,50 @@
 #!/usr/bin/env python3
+
+###################################################################################################################################
+##    Welcome To: THE CHATROOM! - v1.45a by F. - The First Reticulum / Nomadnet IRC-STYLE Chat - Optimized For Meshchat v2.x+    ##
+##                                                                                                                               ##
+## This Nomadnet Page Script allows to create a ready-to-run irc style chatroom, just copy all the files of this github release  ##
+## into your ./nomadnetwork/storage/pages/ folder , make index.mu executable with chmod +x and launch your Nomadnet Node.        ##
+##                                                                                                                               ##
+##                            More info on the official github: https://github.com/fr33n0w/thechatroom                           ##
+##                                                                                                                               ##
+##                            Come To Visit and Join The Original ChatRoom Nomadnet to see it in action:                         ##
+##                                        Link: d251bfd8e30540b5bd219bbbfcc3afc5:/page/index.mu                                  ##
+##                                                                                                                               ##
+##                                                                                                                               ##
+##  THIS NOMADNET PAGE PYTHON SCRIPT IS FREE AND OPEN SOURCE, PLEASE KEEP ORIGINAL LINKS INSIDE TO SUPPORT THE DEVELOPER'S WORK! ##
+################################################### ENJOY YOUR NEW CHATROOM! ######################################################
+
+######## IMPORT MODULES: ######## 
 import os, sys, json, time, random, re, sqlite3
 
-######## SYS & FILE PATHS ########
+######## SYS & FILE PATHS ######## 
 DB_PATH = os.path.join(os.path.dirname(__file__), "chatusers.db")
 EMO_DB = os.path.join(os.path.dirname(__file__), "emoticons.txt")
 
-#########  EDITABLE SETTINGS: ######## 
-MAX_CHARS = 108  # Adjust as needed to split messages after N chars
+######## DISPLAY LIMIT SETTINGS: ######## (Keeps UI fixed in the meshchat browser)
+MAX_CHARS = 110  # Adjust as needed to split messages after N chars
 MAX_LINES = 28   # Max lines on screen
-SYSADMIN = "YourSysAdminNickname" # SET YOUR ADMIN NICKNAME FOR CHAT ADMIN COMMANDS
+
+######## MASTER SYSADMIN SETTINGS ######## (USE COMPLEX NICKNAMES FOR THE SYSADMINS!!)
+SYSADMIN = "Th3Ch4tR00m4dm1n" # SET YOUR MASTER ADMIN NICKNAME FOR CHAT ADMIN COMMANDS
+
+######## ADDED ADMINS SETTINGS (COMMENTED, WORK IN PROGRESS!!) ######## 
+#SYSADMINS_PATH = os.path.join(os.path.dirname(__file__), "admins.json")
+#
+#def load_sysadmins():
+#    if os.path.exists(SYSADMINS_PATH):
+#        with open(SYSADMINS_PATH, "r") as f:
+#            return json.load(f)
+#    return ["SYSADMIN"]
+#
+#def save_sysadmins(admins):
+#    with open(SYSADMINS_PATH, "w") as f:
+#        json.dump(admins, f)
+#
+#if not os.path.exists(SYSADMINS_PATH):
+#    save_sysadmins([])
+
 
 ######## UI Unicode Emojis: ######## 
 user_icon = "\U0001F464" # "\U0001F464" # "\U0001F465" - "\U0001FAAA"
@@ -23,7 +59,7 @@ nickset_icon = "\U0001F504"
 info_icon = "\u1F6C8"
 stats_icon = "\u1F4DD"
 
-#########  Antispam filters: ######## 
+######## Antispam filters: ######## (Add or remove what you want to allow or not)
 spam_patterns = [
     r"buy\s+now",
     r"free\s+money",
@@ -81,16 +117,40 @@ spam_patterns = [
     r"\b(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\s+for\s+(free|you)\b",
     r"\bfree\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b",
     r"\bget\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b",
-    r"\bmake\s+money\s+(with|from)\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b"
+    r"\bmake\s+money\s+(with|from)\s+(bitcoin|bitcoins|crypto|ethereum|tokens|coins)\b",
+    r"\b(sex|porn|xxx|nude|nudes|nsfw|onlyfans|camgirl|camgirls|adult\s+video|erotic|blowjob|anal|fetish|strip|escort|hardcore|incest|milf|hentai|boobs|naked|cumshot|threesome|gangbang|squirting|deepthroat)\b",
+    r"\b(pornhub|xvideos|redtube|xnxx|xhamster|cam4|chaturbate|brazzers|bangbros|spankbang|fleshlight|adultfriendfinder|livejasmin|myfreecams|stripchat|sex.com)\b",
+    r"\bwatch\s+(live\s+)?(sex|porn|camgirls|nudes)\b",
+    r"\bfree\s+(porn|cams|nudes|xxx|sex\s+videos)\b",
+    r"\bhot\s+(girls|milfs|teens|models)\s+(live|online|waiting)\b",
+    r"\bclick\s+(here|link)\s+(for|to)\s+(sex|porn|nudes|xxx|cam)\b",
+    r"\b(see|watch|join)\s+(my|our)?\s*(onlyfans|cam|sex\s+show)\b",
+    r"\b(win(?:ner)?|free|guaranteed|prize|cash|credit|loan|investment|rich|easy\s+money|urgent)\b",
+    r"\b(click\s+here|act\s+now|limited\s+time|exclusive\s+deal|verify\s+your\s+account|update\s+required|login\s+now|reset\s+password)\b",
+    r"\b(discount|sale|offer|promo|buy\s+now|order\s+today|lowest\s+price|cheap|bargain|deal)\b",
+    r"\b(bit\.ly|tinyurl\.com|goo\.gl|freegift|get-rich|fastcash|adult|xxx|cams|nudes)\b",
+    r"\b(make\s+\$\d{2,}|earn\s+\$\d{2,}|work\s+from\s+home|no\s+experience\s+needed)\b",
+    r"\b(earn|make)\s+(money|cash)\s+(from\s+home|online|fast|easily)\b",
+    r"\b(work\s+from\s+home|no\s+experience\s+needed|easy\s+income|passive\s+income)\b",
+    r"\b(start\s+earning|get\s+paid\s+daily|quick\s+cash|instant\s+money)\b",
+    r"\b(earn|make)\s+(money|cash)\s+(from|at)\s+home\b",
+    r"\b(work\s+(from|at)\s+home|easy\s+income|passive\s+income)\b",
+    r"\b(start\s+earning|get\s+paid\s+(daily|instantly)|quick\s+cash|instant\s+money)\b",
+    r"\b(work\s+(from|at)\s+home|easy\s+income|passive\s+income|get\s+paid\s+(daily|instantly)|quick\s+cash|instant\s+money)\b",
+    r"\b(earn|make|get)\s+(money|cash|income)\s*(now|fast|quickly|easily)?\b",
+    r"\b(passive\s+income|easy\s+money|no\s+experience|required|work\s+online|get\s+paid\s+(daily|instantly))\b",
+    r"\b(earn|make|get|receive)\s+(some\s+)?(money|cash|income|profit|revenue)\b",
+    r"\b(now|fast|easy|quick|instantly|today|no\s+experience|required)\b"
+
 ]
 
-################# Nickname AutoColor System ############# ######### 
+######### Nickname Auto-Color System ########## (Change colors if you want)
 colors = [ "B900", "B090", "B009", "B099", "B909", "B066", "B933", "B336", "B939", "B660", "B030", "B630", "B363", "B393", "B606", "B060", "B003", "B960", "B999", "B822", "B525", "B255", "B729", "B279", "B297", "B972", "B792", "B227", "B277", "B377", "B773", "B737", "B003", "B111", "B555", "B222", "B088", "B808", "B180" ]
 def get_color(name):
     return colors[sum(ord(c) for c in name.lower()) % len(colors)]
 
 
-######### Recover input from os environment variables ########
+#########  Recover input from Os Environment variables ######## 
 def recover_input(key_suffix):
     for k, v in os.environ.items():
         if k.lower().endswith(key_suffix):
@@ -111,7 +171,7 @@ if not message and len(sys.argv) > 2:
 if not dest and len(sys.argv) > 3:
     dest = sys.argv[3].strip()
 
-# Extract hash code from remote identity and LXMF address, if sent by the user with the fingerprint button
+# Extract hash code from remote identity and LXMF address
 hash_code = remote_identity[-4:] if remote_identity else ""
 dest_code = dest[-4:] if dest else ""
 
@@ -119,30 +179,11 @@ dest_code = dest[-4:] if dest else ""
 if nickname:
     display_name = nickname
 elif dest:
-    display_name = f"Guest_{dest_code}" # temporary nickname on first fingerprint usage
+    display_name = f"Guest_{dest_code}"
 else:
-    display_name = "Guest" # default nickname on missing fingerprint 
+    display_name = "Guest"
 
-# os env print for debug test , commented, can be removed if unused
-#print("> Meshchat Environment Variables:\n")
-#for key, value in os.environ.items():
-#   print(f"{key} = {value}")
-
-# os env print test to check recovered inputs
-#print(f"[DEBUG] Recovered Inputs:")
-#print(f"  Username        : {raw_username}")
-#print(f"  Message         : {message}")
-#print(f"  Nickname        : {nickname}")
-#print(f"  Nickfieldname        : {field_nickname}")
-#print(f"  Remote Identity : {remote_identity}")
-#print(f"  Hash Code       : {hash_code}")
-#print(f"  LXMF Code       : {dest_code}")
-#print(f"  LXMF Address    : {dest}")
-#print(f"  Display Name    : {display_name}")
-#print("Using database at:", os.path.abspath(DB_PATH))
-
-# sql db nick binding and recovering
-
+######### sql db nick binding and recovering function ########
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -185,7 +226,7 @@ def save_user_to_db(remote_identity, dest, display_name):
 # Initialize DB
 init_db()
 
-# Get environment variables
+######### Get environment variables ########
 nickname = os.getenv("field_username", "").strip()
 dest = os.getenv("dest", "").strip()
 remote_identity = os.getenv("remote_identity", "").strip()
@@ -206,9 +247,7 @@ else:
 # Save user to DB if valid
 save_user_to_db(remote_identity, dest, display_name)
 
-# -----------------------------------------------
-
-######## nickname input sanitization ########
+######## NICKNAME SANITIZATION ########
 safe_username = (
     raw_username.replace("`", "").replace("<", "").replace(">", "")
     .replace("\n", "").replace("\r", "").replace('"', "").replace("'", "")
@@ -220,7 +259,7 @@ safe_username = (
     .replace("$", "").replace(" ", "").strip() or "Guest"
 )
 
-######## reading chatroom topic from file or set a default if missing ########
+######## CHATROOM TOPIC MANAGEMENT ########
 topic_file = os.path.join(os.path.dirname(__file__), "topic.json")
 try:
     with open(topic_file, "r") as tf:
@@ -243,7 +282,7 @@ except Exception as e:
     log = []
     debug.append(f"Failed to load log: {e}")
 
-######################### USER COMMANDS LOGIC: ########################
+######### USER COMMANDS LOGIC: ########
 cmd = message.strip().lower()
 
 ##### ADMIN COMMANDS #####
@@ -302,7 +341,7 @@ elif safe_username == SYSADMIN and cmd == "/clearall":
 
 
 
-################## CHAT USERS COMMANDS #################
+########## CHAT USERS COMMANDS #########
 
 #### STATS COMMAND ####
 elif cmd == "/stats":
@@ -378,10 +417,11 @@ elif cmd == "/cmd":
         "`!` /welcome`! : Sends a welcome message. Usage: /welcome or /welcome <nickname>. ",
         "--------------------------------------",
         f"`!` {cmd_icon} USER STATUS INTERACTIONS COMMANDS`!`",
-        "`!` /hi, /bye, /brb, /lol, /exit, /quit, /away, /back `!`",
+        "`!` /hi, /bye, /brb, /lol, /exit, /quit, /away, /back, /notice `!`",
         "`!` Commands Usage Example:  /hi OR /hi Hello World! `! (Syntax is valid for all the above commands!)",
         "--------------------------------------",
-        "`!` END OF COMMAND LIST: `[RELOAD THE PAGE TO GO BACK TO THE CHATROOM`:/page/index.mu`username]` `! ",
+        f"`!` {cmd_icon} ADMIN COMMANDS INFO: /admincmd (Only admins allowed to perform this command) `!`",
+        "`!` --------- END OF COMMAND LIST: `[CLICK TO RELOAD THE PAGE`:/page/index.mu`username]` --------- `!",
 
     ]
     for line in help_lines:
@@ -390,6 +430,66 @@ elif cmd == "/cmd":
             "user": "System",
             "text": line
         })
+
+######## /admincmd admin command ######## 
+elif cmd == "/admincmd":
+    if safe_username == SYSADMIN:
+        admin_lines = [
+            f"`! {cmd_icon} ADMIN COMMANDS INFO `!",
+            "`! You have access to restricted administrative functions.`!",
+            "`! /clear `! : Deletes last message from the chatroom and database permanently",
+            "`! /clear N`! : Deletes last N messages from the chatroom and database permanently, example: /clear 3",
+            "`! /clear user <nickname>`! : Delete all messages from a specified user permanently",
+            "`! /clearall  `! : Permanently clear the whole chatroom log and database (Irreversible: use with caution!)",
+            "`! /backup `! : Creates a full chat_log.json database backup in the same chatroom script folder",
+            "--------------------------------------",
+            "`! END OF ADMIN COMMANDS LIST `!"
+        ]
+        for line in admin_lines:
+            log.append({
+                "time": time.strftime("[%H:%M]"),
+                "user": "System",
+                "text": line
+            })
+    else:
+        log.append({
+            "time": time.strftime("[%H:%M]"),
+            "user": "System",
+            "text": "`! ERROR: You do not have permission to use /admincmd. This command is restricted to SYSADMYN.`!"
+        })
+
+######### /backup admin command ########
+elif cmd == "/backup":
+    if safe_username == SYSADMIN:
+        try:
+            # Create timestamped backup filename in the same directory
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            backup_file = os.path.join(os.path.dirname(__file__), f"chat_log_backup_{timestamp}.json")
+
+            # Perform the backup
+            import shutil
+            shutil.copy(log_file, backup_file)
+
+            log.append({
+                "time": time.strftime("[%H:%M]"),
+                "user": "System",
+                "text": f"`! Backup successful: {backup_file}`!"
+            })
+        except Exception as e:
+            log.append({
+                "time": time.strftime("[%H:%M]"),
+                "user": "System",
+                "text": f"`! ERROR: Backup failed. Reason: {str(e)}`!"
+            })
+    else:
+        log.append({
+            "time": time.strftime("[%H:%M]"),
+            "user": "System",
+            "text": "`! ERROR: You do not have permission to use /backup - This command is restricted to SYSADMIN.`!"
+        })
+
+########## /admin add|remove <nickname> or /admin list for the master admin #########
+# COMING SOON!
 
 ######## INFO COMMAND #########
 elif cmd == "/info":
@@ -409,11 +509,12 @@ elif cmd == "/info":
         "/lastseen <username> : check a user's recent activity",
         "/topic : show or change the room topic",
         "/stats : show chat stats including top chatters",
-        "`!` Use /help to view the full list of available commands. `!`",
+        "`!` Use /cmd to view the full list of available commands. `!`",
         "`!` Technical Notes `!`",
         "Due to micron limitations, the chatroom does not refresh automatically.",
-        "To see new messages or preserve your nickname, reload the page using the provided link buttons.",
+        "To see new incoming messages, reload the page using the provided link buttons.",
         "Refreshing the page using meshchat browser function will remove nickname persistance, so use our Reload button",
+        "To have a nickname persistency, use the Meshchat v2.+ Fingerprint Button to save and recall (lxmf binding).",
         "The main chatroom shows the last 30 messages; use the button at the bottom to view the full chat log.",
         "`!` DISCLAIMER `!`",
         "This chatroom is a space for connection, collaboration, and respectful interaction.",
@@ -442,13 +543,14 @@ elif cmd == "/time":
 
 ############ VERSION COMMAND ##########
 elif cmd == "/version":
-    version_text = "The Chat Room v1.45b / Powered by Reticulum NomadNet / IRC Style / Optimized for Meshchat / Made by F"
+    version_text = "The Chat Room v1.45a / Powered by Reticulum NomadNet / IRC Style / Optimized for Meshchat / Made by F"
     version_text2 = "This chat is running on a VPS server, powered by RNS v1.0.0 and Nomadnet v.0.8.0."
     version_text3 = "Latest Implementations in v1.3b: AntiSpam Filter and Nickname persistency (Thanks To: Thomas!!)"
     version_text4 = "Latest Implementations in v1.4b: Improved UI with Message splitting on long messages"
     version_text5 = "Latest Implementations in v1.44b: Improved UI, resolved few ui bugs, added Menu Bar on the bottom, added /search command, added 'Read Last 100 Messages', started implementing user settings (for future user preferences implementations: custom nickname colors, multiple chat themes and more...coming soon!)"
-    version_text6 = "Latest Implementations in v1.45b: Added Social Interactions Commands, for full command list: /cmd \n Improved UI and readability\n"
-    version_text7 = "Get The ChatRoom on: https://github.com/fr33n0w/thechatroom/"
+    version_text6 = "Latest Implementations in v1.45b: Added Social Interactions Commands, for full command list: /cmd \n Improved UI and readability"
+    version_text7 = "Latest Implementations in v1.45a: Alpha Stable Version, \n Improved display limit function, \n Added SYSADMIN commands (digit /admincmd for help, only for SYSADMIN) \n Improved AntiSpam Filters \n Get The ChatRoom at: https://github.com/fr33n0w/thechatroom "
+
 
     log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text})
     log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text2})
@@ -457,6 +559,7 @@ elif cmd == "/version":
     log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text5})
     log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text6})
     log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text7})
+
 
 ######## LASTSEEN COMMAND ########
 elif cmd.startswith("/lastseen "):
@@ -897,18 +1000,49 @@ elif cmd.startswith("/welcome"):
             "text": f"`!` Error processing /welcome command: {e} `!`"
         })
 
+###### /notice COMMAND #######
+elif cmd.startswith("/notice"):
+    try:
+        parts = cmd.split(" ", 1)
+        user_message = parts[1].strip() if len(parts) > 1 else ""
+        timestamp = time.strftime("[%H:%M]")
+        # Get color code for nickname
+        nickname_color = get_color(safe_username)
+        # Format nickname using your markup style
+        colored_nickname = f"`{nickname_color}{safe_username}`b"
+        # Build message
+        base_text = f"NOTICE FROM {colored_nickname}:"
+        if user_message:
+            full_text = f" `!{base_text}  {user_message} `!"
+        else:
+            full_text = f" `!{base_text} `!"
+        log.append({
+            "time": timestamp,
+            "user": "System",
+            "text": full_text
+        })
+        with open(log_file, "w") as f:
+            json.dump(log, f)
+    except Exception as e:
+        log.append({
+            "time": time.strftime("[%H:%M]"),
+            "user": "System",
+            "text": f"`!` Error processing /notice command: {e} `!`"
+        })
 
-##################### END OF COMMANDS, CONTINUE SCRIPT PAGE ##############################
+
+
+##################### END OF COMMANDS, CONTINUE SCRIPT ##############################
 
 elif raw_username and message and message.lower() != "null":
-    sanitized_message = message.replace("`", "").replace("[", "")  # remove backticks and [ to prevent formatting issues or code injection
+    sanitized_message = message.replace("`", "").replace("[", "")  # remove backticks and [ to prevent formatting issues
 
 ######### Spam detection logic ######## 
     banned_words = ["buy now", "free money", "click here", "subscribe", "win big", "limited offer", "act now"]
     is_spam = any(re.search(pattern, sanitized_message.lower()) for pattern in spam_patterns)
 
     if is_spam:
-        # Don't write to JSON, just log the system message
+        # ?? Don't write to JSON, just log the system message
         log.append({
             "time": time.strftime("[%H:%M]"),
             "user": "System",
@@ -916,7 +1050,7 @@ elif raw_username and message and message.lower() != "null":
         })
         debug.append(f" Spam blocked from '{safe_username}'")
     else:
-        # Normal message flow
+        # ? Normal message flow
         log.append({
             "time": time.strftime("[%H:%M]"),
             "user": safe_username,
@@ -948,7 +1082,7 @@ def split_message(text, max_chars):
         lines.append(current_line)
     return lines
 
-#########  dynamic ui display messages adaptation ######## 
+#########  dynamic ui displayed messages adaptation ######## 
 def calculate_effective_limit(log, max_lines, max_chars):
     total_lines = 0
     effective_limit = 0
@@ -989,13 +1123,14 @@ def substitute_emoticons_in_line(line):
 ############################## Output UI template: ######################################
 
 #INTRO TITLE:
-template = f"> `!{message_icon}  THE CHAT ROOM! {message_icon}  `F007` Powered by Reticulum NomadNet - IRC Style - Free Global Chat Room - Optimized for Meshchat v2.x+ - v1.45b `f`!\n"
+template = f"> `!{message_icon}  THE CHAT ROOM! {message_icon}  `F007` Powered by Reticulum NomadNet - IRC Style - Free Global Chat Room - Optimized for Meshchat v2.x+ - v1.45a `f`!\n"
 template += "-\n"
 
 # TOPIC READING AND RENDERING:
 template += f"`c`B000`Ff2e`!`  ########## Room Topic: {topic_text} `! (Set by: {topic_author}, {topic_data.get('time')}) `!` ########## `!`f`b`a\n"
 template += "-\n"
 
+########### CHATLOG READING AND RENDERING  ##########
 # Build set of known usernames
 known_users = {msg["user"] for msg in log}
 
@@ -1022,6 +1157,7 @@ safe_display_name = display_name.replace("`", "'")
 # User Interaction Bar (Nick & Messages )
 template += f"\n>`!` {user_icon} Nickname: `Baac`F000`<12|username`{safe_display_name}>`!`b`[{nickset_icon} `:/page/index.mu`username]`!   {message_icon}  Message: `Baac`<52|message`>`b`!"
 template += f" `!`[{send_icon}  Send Message`:/page/index.mu`username|message]`! | `!`[{reload_icon} Reload`:/page/index.mu`username]`!\n"
+
 
 template += "-\n"
 
