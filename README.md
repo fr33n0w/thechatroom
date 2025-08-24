@@ -136,6 +136,7 @@ chmod +x ~/.nomadnetwork/storage/pages/index.mu
 chmod +x ~/.nomadnetwork/storage/pages/fullchat.mu
 chmod +x ~/.nomadnetwork/storage/pages/last100.mu
 ```
+Also make sure your user has read and write permission for the json and db files!
 
 ### 🚀 4. Launch NomadNet
 
