@@ -21,7 +21,7 @@ import os, sys, json, time, random, re, sqlite3
 
 ######## SYS & FILE PATHS ######## 
 DB_PATH = os.path.join(os.path.dirname(__file__), "chatusers.db")
-EMO_DB = os.path.join(os.path.dirname(__file__), "emoticons.txt")
+EMO_DB = os.path.join(os.path.dirname(__file__), "emoticon.txt")
 
 ######## DB CREATION IF MISSING (on first start usually) ######
 if not os.path.exists(DB_PATH):
