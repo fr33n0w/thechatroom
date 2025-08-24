@@ -570,7 +570,7 @@ elif cmd == "/version":
         "Alpha Stable Version Release Ready - Improved display limit function",
         "Added SYSADMIN commands (type /admincmd for help, only allowed for SYSADMIN) ",
         "Improved AntiSpam Filters, Better UI Timestamp, Added /meteo command",
-        "`! Get The ChatRoom at: Coming Soon! - STAY TUNED! `!"
+        "`! Get The ChatRoom at: https://github.com/fr33n0w/thechatroom `!"
     ]
 
     for msg in version_messages:
