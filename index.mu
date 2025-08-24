@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 ###################################################################################################################################
 ##    Welcome To: THE CHATROOM! - v1.45a by F. - The First Reticulum / Nomadnet IRC-STYLE Chat - Optimized For Meshchat v2.x+    ##
@@ -22,28 +23,43 @@ import os, sys, json, time, random, re, sqlite3
 DB_PATH = os.path.join(os.path.dirname(__file__), "chatusers.db")
 EMO_DB = os.path.join(os.path.dirname(__file__), "emoticons.txt")
 
+######## DB CREATION IF MISSING (on first start usually) ######
+if not os.path.exists(DB_PATH):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            remote_identity TEXT,
+            dest TEXT,
+            display_name TEXT
+        );
+    """)
+    conn.commit()
+    conn.close()
+
 ######## DISPLAY LIMIT SETTINGS: ######## (Keeps UI fixed in the meshchat browser)
 MAX_CHARS = 110  # Adjust as needed to split messages after N chars
 MAX_LINES = 28   # Max lines on screen
 
-######## MASTER SYSADMIN SETTINGS ######## (USE COMPLEX NICKNAMES FOR THE SYSADMINS!!)
+######## MASTER SYSADMIN SETTINGS ######## (USE COMPLEX NICKNAMES FOR THE SYSADMINS!)
 SYSADMIN = "Th3Ch4tR00m4dm1n" # SET YOUR MASTER ADMIN NICKNAME FOR CHAT ADMIN COMMANDS
 
-######## ADDED ADMINS SETTINGS (COMMENTED, WORK IN PROGRESS!!) ######## 
-#SYSADMINS_PATH = os.path.join(os.path.dirname(__file__), "admins.json")
-#
-#def load_sysadmins():
-#    if os.path.exists(SYSADMINS_PATH):
-#        with open(SYSADMINS_PATH, "r") as f:
-#            return json.load(f)
-#    return ["SYSADMIN"]
-#
-#def save_sysadmins(admins):
-#    with open(SYSADMINS_PATH, "w") as f:
-#        json.dump(admins, f)
-#
-#if not os.path.exists(SYSADMINS_PATH):
-#    save_sysadmins([])
+######## JUST ADDED ADMINS SETTINGS, WORK IN PROGRESS!! ######## 
+SYSADMINS_PATH = os.path.join(os.path.dirname(__file__), "admins.json")
+
+def load_sysadmins():
+    if os.path.exists(SYSADMINS_PATH):
+        with open(SYSADMINS_PATH, "r") as f:
+            return json.load(f)
+    return ["SYSADMIN"]
+
+def save_sysadmins(admins):
+    with open(SYSADMINS_PATH, "w") as f:
+        json.dump(admins, f)
+
+if not os.path.exists(SYSADMINS_PATH):
+    save_sysadmins([])
 
 
 ######## UI Unicode Emojis: ######## 
@@ -144,7 +160,7 @@ spam_patterns = [
 
 ]
 
-######### Nickname Auto-Color System ########## (Change colors if you want)
+################### Nickname Auto-Color System ##################### (Change colors if you want)
 colors = [ "B900", "B090", "B009", "B099", "B909", "B066", "B933", "B336", "B939", "B660", "B030", "B630", "B363", "B393", "B606", "B060", "B003", "B960", "B999", "B822", "B525", "B255", "B729", "B279", "B297", "B972", "B792", "B227", "B277", "B377", "B773", "B737", "B003", "B111", "B555", "B222", "B088", "B808", "B180" ]
 def get_color(name):
     return colors[sum(ord(c) for c in name.lower()) % len(colors)]
@@ -183,7 +199,7 @@ elif dest:
 else:
     display_name = "Guest"
 
-######### sql db nick binding and recovering function ########
+# sql db nick binding and recovering
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -226,7 +242,7 @@ def save_user_to_db(remote_identity, dest, display_name):
 # Initialize DB
 init_db()
 
-######### Get environment variables ########
+# Get environment variables
 nickname = os.getenv("field_username", "").strip()
 dest = os.getenv("dest", "").strip()
 remote_identity = os.getenv("remote_identity", "").strip()
@@ -247,7 +263,7 @@ else:
 # Save user to DB if valid
 save_user_to_db(remote_identity, dest, display_name)
 
-######## NICKNAME SANITIZATION ########
+# Nickname Input Sanitization
 safe_username = (
     raw_username.replace("`", "").replace("<", "").replace(">", "")
     .replace("\n", "").replace("\r", "").replace('"', "").replace("'", "")
@@ -259,7 +275,7 @@ safe_username = (
     .replace("$", "").replace(" ", "").strip() or "Guest"
 )
 
-######## CHATROOM TOPIC MANAGEMENT ########
+# Topic Reading from the json file or default if missing
 topic_file = os.path.join(os.path.dirname(__file__), "topic.json")
 try:
     with open(topic_file, "r") as tf:
@@ -282,7 +298,7 @@ except Exception as e:
     log = []
     debug.append(f"Failed to load log: {e}")
 
-######### USER COMMANDS LOGIC: ########
+# USER COMMANDS LOGIC:
 cmd = message.strip().lower()
 
 ##### ADMIN COMMANDS #####
@@ -339,9 +355,7 @@ elif safe_username == SYSADMIN and cmd == "/clearall":
     else:
         debug.append("Log already empty. Nothing to clear.")
 
-
-
-########## CHAT USERS COMMANDS #########
+########## USERS COMMANDS #########
 
 #### STATS COMMAND ####
 elif cmd == "/stats":
@@ -394,22 +408,23 @@ elif cmd == "/users":
 ############# /cmd COMMAND INFO LINES ############
 elif cmd == "/cmd":
     help_lines = [
-        f"`! {message_icon} THE CHATROOM!{message_icon}  \\  EXTENDED USER COMMANDS INFO:`!",
-        f"`! GENERAL USE AND INFORMATIONAL COMMANDS:`!",
-        f"`! /info`! :  Show The Chat Room! Informations, Usage and Disclaimer",
-        f"`! /cmd`! : Show all the available user commands",
-        f"`! /stats`! : Show chatroom statistics, including Top 5 Chatters",
-        f"`! /users`! : List all chatroom users",
-        f"`! /version`! : Show THE CHAT ROOM! script version, news and infos",
+        f"`!{message_icon} THE CHATROOM!{message_icon}  \\  EXTENDED USER COMMANDS INFO:`!",
+        f"`!GENERAL USE AND INFORMATIONAL COMMANDS:`!",
+        f"`!/info`! :  Show The Chat Room! Informations, Usage and Disclaimer",
+        f"`!/cmd`! : Show all the available user commands",
+        f"`!/stats`! : Show chatroom statistics, including Top 5 Chatters",
+        f"`!/users`! : List all chatroom users",
+        f"`!/version`! : Show THE CHAT ROOM! script version, news and infos",
+
+        f"`! {cmd_icon} INTERACTIVE CHAT COMMANDS`!",
+        "`!/lastseen <username>`!`: Last seen user info and latest user message",
+        "`!/topic`!` : Show or Change Room Topic, usage: '/topic' or '/topic Your New Topic Here' ",
+        "`!/search <keyword(s)>`!` : Search for keywords in the full chatlog ",
+        "`!/time`!` : Show current Chat Server Time (UTC) and your Local Time",
+        "`!/ping`!` : Reply with PONG! if the chat system is up and working",
+        "`!/meteo <cityname>`! : Get weather info for your city, example: /meteo Miami",
         "--------------------------------------",
-        f"`!` {cmd_icon} INTERACTIVE CHAT COMMANDS`!`",
-        "`!` /lastseen <username>`!`: Last seen user info and latest user message",
-        "`!` /topic`!` : Show or Change Room Topic, usage: '/topic' or '/topic Your New Topic Here' ",
-        "`!` /search <keyword(s)>`!` : Search for keywords in the full chatlog ",
-        "`!` /time`!` : Show current Chat Server Time (UTC) and your Local Time",
-        "`!` /ping`!` : Reply with PONG! if the chat system is up and working",
-        "--------------------------------------",
-        f"`!` {cmd_icon} SOCIAL INTERACTIONS COMMANDS`!`",
+        f"`! {cmd_icon} SOCIAL INTERACTIONS COMMANDS`!",
         "`!` /e`!` : Sends randomized emojis from the internal emoji list",
         "`!` /c <text message>`!` : Sends a colored chat message with randomized background and font colors",
         "`!` @nickname`!` : Sends a colored mention to highlight the mentioned user in a reply message",
@@ -489,7 +504,6 @@ elif cmd == "/backup":
         })
 
 ########## /admin add|remove <nickname> or /admin list for the master admin #########
-# COMING SOON!
 
 ######## INFO COMMAND #########
 elif cmd == "/info":
@@ -530,7 +544,7 @@ elif cmd == "/info":
             "text": line
         })
 
-############ TIME COMMAND ###############
+############ TIME COMMAND ############### (set your timezone to adapt local timestamp)
 elif cmd == "/time":
     server_time = time.strftime("%Y-%m-%d %H:%M:%S")
     try:
@@ -538,28 +552,33 @@ elif cmd == "/time":
         user_time = datetime.datetime.now(pytz.timezone("Europe/Rome")).strftime("%Y-%m-%d %H:%M:%S")
     except:
         user_time = "(Local time not available)"
-    time_text = f"Server time: {server_time} // User time (Naples): {user_time}"
+    time_text = f"Server time: {server_time} // User time : {user_time}"
     log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": time_text})
 
-############ VERSION COMMAND ##########
+########## VERSION COMMAND #########
 elif cmd == "/version":
-    version_text = "The Chat Room v1.45a / Powered by Reticulum NomadNet / IRC Style / Optimized for Meshchat / Made by F"
-    version_text2 = "This chat is running on a VPS server, powered by RNS v1.0.0 and Nomadnet v.0.8.0."
-    version_text3 = "Latest Implementations in v1.3b: AntiSpam Filter and Nickname persistency (Thanks To: Thomas!!)"
-    version_text4 = "Latest Implementations in v1.4b: Improved UI with Message splitting on long messages"
-    version_text5 = "Latest Implementations in v1.44b: Improved UI, resolved few ui bugs, added Menu Bar on the bottom, added /search command, added 'Read Last 100 Messages', started implementing user settings (for future user preferences implementations: custom nickname colors, multiple chat themes and more...coming soon!)"
-    version_text6 = "Latest Implementations in v1.45b: Added Social Interactions Commands, for full command list: /cmd \n Improved UI and readability"
-    version_text7 = "Latest Implementations in v1.45a: Alpha Stable Version, \n Improved display limit function, \n Added SYSADMIN commands (digit /admincmd for help, only for SYSADMIN) \n Improved AntiSpam Filters \n Get The ChatRoom at: https://github.com/fr33n0w/thechatroom "
+    version_messages = [
+        "The Chat Room v1.45a / Powered by Reticulum NomadNet / IRC Style / Optimized for Meshchat / Made by F",
+        "This chat is running on a VPS server, powered by RNS v1.0.0 and Nomadnet v.0.8.0.",
+        "Latest Implementations in v1.3b: AntiSpam Filter and Nickname persistency (Thanks To: Thomas!!)",
+        "Latest Implementations in v1.4b: Improved UI with Message splitting on long messages",
+        "Latest Implementations in v1.44b: Improved UI, resolved few UI bugs, added Menu Bar on the bottom, added /search command, added 'Read Last 100 Messages', started implementing user settings (for future user preferences: custom nickname colors, multiple chat themes and more...coming soon!)",
+        "Latest Implementations in v1.45b:",
+        "Added Social Interactions Commands, for full command list: /cmd",
+        "Improved UI and readability, fixed dysplay limit function!",
+        "Latest Implementations in v1.45a:",
+        "Alpha Stable Version Release Ready - Improved display limit function",
+        "Added SYSADMIN commands (type /admincmd for help, only allowed for SYSADMIN) ",
+        "Improved AntiSpam Filters, Better UI Timestamp, Added /meteo command",
+        "`! Get The ChatRoom at: Coming Soon! - STAY TUNED! `!"
+    ]
 
-
-    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text})
-    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text2})
-    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text3})
-    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text4})
-    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text5})
-    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text6})
-    log.append({"time": time.strftime("[%H:%M]"), "user": "System", "text": version_text7})
-
+    for msg in version_messages:
+        log.append({
+            "time": time.strftime("[%H:%M]"),
+            "user": "System",
+            "text": msg
+        })
 
 ######## LASTSEEN COMMAND ########
 elif cmd.startswith("/lastseen "):
@@ -1030,6 +1049,94 @@ elif cmd.startswith("/notice"):
             "text": f"`!` Error processing /notice command: {e} `!`"
         })
 
+####### METEO COMMAND #######
+elif cmd.startswith("/meteo"):
+    try:
+        from geopy.geocoders import Nominatim
+        import requests
+
+        # Extract city name
+        parts = cmd.split(" ", 1)
+        city_name = parts[1].strip() if len(parts) > 1 else ""
+        timestamp = time.strftime("[%H:%M]")
+
+        if not city_name:
+            raise ValueError("No city name provided. Example: /meteo New York")
+
+        # Geolocation
+        geolocator = Nominatim(user_agent="weather_bot")
+        location = geolocator.geocode(city_name)
+        if not location:
+            raise ValueError(f"Could not find location for '{city_name}'.")
+
+        lat, lon = location.latitude, location.longitude
+
+        # Open-Meteo API call
+        weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
+        response = requests.get(weather_url)
+        data = response.json()
+
+        if "current_weather" not in data:
+            raise ValueError("Weather data not available.")
+
+        temp = data["current_weather"]["temperature"]
+        code = data["current_weather"]["weathercode"]
+
+        # Weather code mapping (no emojis)
+        weather_codes = {
+            0: "Clear sky",
+            1: "Mainly clear",
+            2: "Partly cloudy",
+            3: "Overcast",
+            45: "Fog",
+            48: "Depositing rime fog",
+            51: "Light drizzle",
+            53: "Moderate drizzle",
+            55: "Dense drizzle",
+            56: "Light freezing drizzle",
+            57: "Dense freezing drizzle",
+            61: "Slight rain",
+            63: "Moderate rain",
+            65: "Heavy rain",
+            66: "Light freezing rain",
+            67: "Heavy freezing rain",
+            71: "Slight snow fall",
+            73: "Moderate snow fall",
+            75: "Heavy snow fall",
+            77: "Snow grains",
+            80: "Slight rain showers",
+            81: "Moderate rain showers",
+            82: "Violent rain showers",
+            85: "Slight snow showers",
+            86: "Heavy snow showers",
+            95: "Thunderstorm",
+            96: "Thunderstorm with slight hail",
+            99: "Thunderstorm with heavy hail"
+        }
+
+        description = weather_codes.get(code, "Unknown weather")
+
+        # Format nickname
+        nickname_color = get_color(safe_username)
+        colored_nickname = f"`{nickname_color}{safe_username}`b"
+        weather_text = f"Weather in {city_name}: {temp}C, {description}"
+
+        full_text = f"Meteo Request from {colored_nickname}: {weather_text} "
+        log.append({
+            "time": timestamp,
+            "user": "Meteo",
+            "text": full_text
+        })
+
+        with open(log_file, "w") as f:
+            json.dump(log, f)
+
+    except Exception as e:
+        log.append({
+            "time": time.strftime("[%H:%M]"),
+            "user": "System",
+            "text": f"Error processing /meteo command: {e} "
+        })
 
 
 ##################### END OF COMMANDS, CONTINUE SCRIPT ##############################
@@ -1099,6 +1206,24 @@ def calculate_effective_limit(log, max_lines, max_chars):
 effective_limit, total_lines = calculate_effective_limit(log, MAX_LINES, MAX_CHARS)
 
 
+########## UTC server time to local time dynamic conversion ########## 
+from datetime import datetime
+
+def convert_log_time_to_local(log_time_str):
+    # Step 1: Parse log time as naive UTC datetime (assume today's date)
+    today = datetime.utcnow().date()
+    log_time_str = log_time_str.strip("[]")
+    utc_dt = datetime.strptime(f"{today} {log_time_str}", "%Y-%m-%d %H:%M")
+
+    # Step 2: Get system's local timezone-aware datetime
+    local_now = datetime.now().astimezone()
+
+    # Step 3: Replace tzinfo of utc_dt with UTC, then convert to local timezone
+    utc_dt = utc_dt.replace(tzinfo=local_now.tzinfo)  # This sets the correct tzinfo
+    local_dt = utc_dt.astimezone()  # Converts to local time
+
+    return local_dt.strftime("%H:%M")
+
 
 #########  mention users def logic on @user message ######## 
 def highlight_mentions_in_line(line, known_users):
@@ -1130,7 +1255,6 @@ template += "-\n"
 template += f"`c`B000`Ff2e`!`  ########## Room Topic: {topic_text} `! (Set by: {topic_author}, {topic_data.get('time')}) `!` ########## `!`f`b`a\n"
 template += "-\n"
 
-########### CHATLOG READING AND RENDERING  ##########
 # Build set of known usernames
 known_users = {msg["user"] for msg in log}
 
@@ -1139,6 +1263,9 @@ for msg in log[-effective_limit:]:
     color = get_color(msg["user"])
     message_lines = split_message(msg["text"], MAX_CHARS)
     total_parts = len(message_lines)
+    # UTC to Local Time conversion:
+    local_time = convert_log_time_to_local(msg["time"])
+
     for i, line in enumerate(message_lines, start=1):
         marker = f"({i}/{total_parts})" if total_parts > 1 else ""
 
@@ -1150,18 +1277,18 @@ for msg in log[-effective_limit:]:
         template += f"`Ffff` \\{msg['time']} `*` `{color}<{msg['user']}>`b `*` {highlighted_line} \n"
 template += "-"
 
-
 # sanitize and read name from display_name os env
 safe_display_name = display_name.replace("`", "'")
 
 # User Interaction Bar (Nick & Messages )
+# template += f"\n`Ffff`! {user_icon} Nickname: `Bddf`F000`<12|username`{safe_display_name}>`!`B000`Ffff`[{nickset_icon} `:/page/index.mu`username]`! | {message_icon}  Message: `Bddf`F000`<52|message`>`b`!"
+# template += f" `!`Ffff`[{send_icon} Send Message`:/page/index.mu`username|message]`! | `!`[{reload_icon} Reload`:/page/index.mu`username]`!\n"
 template += f"\n>`!` {user_icon} Nickname: `Baac`F000`<12|username`{safe_display_name}>`!`b`[{nickset_icon} `:/page/index.mu`username]`!   {message_icon}  Message: `Baac`<52|message`>`b`!"
 template += f" `!`[{send_icon}  Send Message`:/page/index.mu`username|message]`! | `!`[{reload_icon} Reload`:/page/index.mu`username]`!\n"
 
-
 template += "-\n"
 
-# STATUS BAR (incomplete)
+# STATUS BAR (incomplete, work in progress, maybe)
 # if debug:
 #     latest_debug = debug[-1]
 #     template += f">{cmd_icon}  `B115`Fccc`!SYSTEM STATUS:`! {latest_debug}`b`f\n"
