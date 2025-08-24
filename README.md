@@ -129,10 +129,12 @@ cp -r thechatroom/* ~/nomadnetwork/storage/pages/
 
 ```
 
-### 🔓 3. Make index.mu Executable
+### 🔓 3. Make index.mu and other python pages Executable
 
 ```bash
 chmod +x ~/nomadnetwork/storage/pages/index.mu
+chmod +x ~/nomadnetwork/storage/pages/fullchat.mu
+chmod +x ~/nomadnetwork/storage/pages/last100.mu
 ```
 
 ### 🚀 4. Launch NomadNet
