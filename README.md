@@ -125,16 +125,16 @@ git clone https://github.com/fr33n0w/thechatroom.git
 ### 📂 2. Copy Files to NomadNet Pages Directory
 
 ```bash
-cp -r thechatroom/* ~/nomadnetwork/storage/pages/
+cp -r thechatroom/* ~/.nomadnetwork/storage/pages/
 
 ```
 
 ### 🔓 3. Make index.mu and other python pages Executable
 
 ```bash
-chmod +x ~/nomadnetwork/storage/pages/index.mu
-chmod +x ~/nomadnetwork/storage/pages/fullchat.mu
-chmod +x ~/nomadnetwork/storage/pages/last100.mu
+chmod +x ~/.nomadnetwork/storage/pages/index.mu
+chmod +x ~/.nomadnetwork/storage/pages/fullchat.mu
+chmod +x ~/.nomadnetwork/storage/pages/last100.mu
 ```
 
 ### 🚀 4. Launch NomadNet
