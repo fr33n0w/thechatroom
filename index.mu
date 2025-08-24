@@ -1252,7 +1252,7 @@ template = f"> `!{message_icon}  THE CHAT ROOM! {message_icon}  `F007` Powered b
 template += "-\n"
 
 # TOPIC READING AND RENDERING:
-template += f"`c`B000`Ff2e`!`  ########## Room Topic: {topic_text} `! (Set by: {topic_author}, {topic_data.get('time')}) `!` ########## `!`f`b`a\n"
+template += f"`c`B000`Ff2e`!`  ##### Room Topic: {topic_text} `! (Set by: {topic_author}, {topic_data.get('time')}) `!` ##### `!`f`b`a\n"
 template += "-\n"
 
 # Build set of known usernames
