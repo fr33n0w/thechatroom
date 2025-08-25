@@ -47,7 +47,7 @@ Detailed installation info below.
 - 🎨 Nicknames are randomly colorized and persist across sessions (user settings personalization is coming soon!)
 - 🔒 Nickname to LXMF address binding, using the Fingerprint in Meshchat v2+ to save and recover the nickname across sessions
   (THANKS TO: **THOMAS**)
-- 🛠️ Built with Python and Micron components
+- 🛠️ Built with Python and Micron components, JSON and SQL DBs for chat, topic and nickname persistency
 - 🌐 Official chat script is Hosted on a VPS for stable uptime
 
 Live Demo:  `d251bfd8e30540b5bd219bbbfcc3afc5:/page/index.mu`  
