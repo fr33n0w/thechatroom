@@ -79,7 +79,6 @@ These come bundled with Python and require no additional setup:
 | `time`              | Handles time-based operations (e.g., delays, timestamps)                |
 | `random`            | Generates random values and selections                                  |
 | `re`                | Performs pattern matching with regular expressions                      |
-| `sqlite3`           | Manages local SQLite database storage                                   |
 | `shutil`            | Performs high-level file operations (e.g., copying, moving files)       |
 | `collections`       | Provides specialized data structures like `Counter`                     |
 | `datetime`          | Manages date and time objects                                           |
@@ -93,11 +92,12 @@ These must be installed manually:
 | `pytz`      | Timezone definitions and conversions                                    |
 | `requests`  | Simplified HTTP requests and API calls (needed for /meteo command only) |
 | `geopy`     | Geolocation services (e.g., address lookup via Nominatim, as above)     |
+| `sqlite3`   | Manages local SQLite database storage for Nickname to LXMF binding      |
 
 To install them, run:
 
 ```bash
-pip install pytz requests geopy
+pip install pytz requests geopy sqlite3
 ```
 
 ...and of course, you need NomadNet to host the page:
