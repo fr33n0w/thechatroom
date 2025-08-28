@@ -255,6 +255,19 @@ The ChatRoom! includes already a good list of antispam filters, based on single 
 ## Fixed UI Windows
 The UI is fixed in place with DISPLAY_LIMIT var, limited to 28 messages to fit the MeshChat 2.0+ Nomadnet Browser window. 
 
+## NickName Color System
+Automatically color the user nickname for better readability, keeps it persistant for any message or command, same nick, same color, you can edit the default colors in the script.
+
+## Nickname & LXMF fingerprint binding (Thanks to Thomas!)
+Pressing the Fingerprint button on meshchat v2.1+ , you send your lxmf to the chat and the script will automatically bind the nickname and the lxmf address like a sort of autologin. on rejoining the chat, nickname will be automatically recovered. if the meshchat os variables are missing (in case of reboot for example), just press fingerprint again and based on your lxmf, your nickname will reappear again automatically. Nickname and corresponding LXMF address is saved in a sql db to be recovered.
+
+## Long messages split function
+On longer messages, they will automatically be split in multiple lines to keep persistant ui layout and format.
+
+## Statistics and users commands
+Show chat statistics, top chatters, total sent message per user, total users in chat (commands: /stats or /users)
+
+
 ---
 
 ## Next Work In Progress Features:
