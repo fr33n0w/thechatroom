@@ -146,6 +146,9 @@ nomadnet
 
 # DONE!
 
+Note: TheChatRoom has been created and runt on root user machines, probably you need to be root to run it, let me know if you encounter some difficulties!
+
+LXMF Contact: 0d051f3b6f844380c3e0c5d14e37fac8
 ---
 
 ---
@@ -243,3 +246,21 @@ Here’s the full list of available commands in **THE CHATROOM**, grouped by cat
 
 ---
 
+## Other Features:
+
+### AntiSpam
+
+The ChatRoom! includes already a good list of antispam filters, based on single words or combined phrases. Add your own or remove the unwanted blocked words to make it less strict in spam_patterns lines section of the script. 
+
+## Fixed UI Windows
+The UI is fixed in place with DISPLAY_LIMIT var, limited to 28 messages to fit the MeshChat 2.0+ Nomadnet Browser window. 
+
+---
+
+## Next Work In Progress Features:
+
+### Personalized User Settings
+(eg. set your nickname color preferences, possibility to click nickname to share your lxmf address for private chat, remove your nick and lxmf binding, chat theme selection, ecc.)
+
+### More Administration Commands
+(eg. Add or Remove multiple Administrators)
