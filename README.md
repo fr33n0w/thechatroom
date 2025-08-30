@@ -143,7 +143,7 @@ chmod +x ~/.nomadnetwork/storage/pages/last100.mu
 Also make sure your user has read and write permission for the json and db files!
 
 ### 🚀 4. Launch NomadNet
-
+Install and configure Nomadnet (or other nomadnet hosting page servers), after configuration:
 ```bash
 nomadnet
 ```
