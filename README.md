@@ -100,11 +100,14 @@ To install them, run:
 pip install pytz requests geopy sqlite3
 ```
 
-...and of course, you need NomadNet to host the page:
+and of course, you need to install and configure NomadNet to host the page:
 
 ```bash
 pip install nomadnet
 ```
+
+Tested and 100% working also with rns_server_pages by SebastianObi:
+https://github.com/SebastianObi/RNS-Tools/tree/main/rns_server_page
 
 ---
 
