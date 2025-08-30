@@ -25,13 +25,14 @@ Experience the chatroom in action via the official NomadNet page:
 Welcome to **THE CHATROOM** – v1.45a by F.  
 The first Reticulum/Nomadnet IRC-style chatroom, optimized for Meshchat v2.x+.
 
-Born on v1 the 10 of August 2025. Enjoy!
+Born on v1 (beta) the 10 of August 2025. Enjoy!
 
 **Note:** 
 This chatroom page was developed using MeshChat Browser so it's optimized for MeshChat v2.1+ only, could be unreadable on Nomadnet browser.
 
 A simpler Nomadnet version is coming soon, work in progress, stay tuned!
 
+The script page is considered in alpha stage of development, stay tuned for new changes and updates!
 ---
 
 ## 📘 Project Overview
