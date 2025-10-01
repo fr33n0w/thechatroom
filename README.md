@@ -1,4 +1,4 @@
-# 💬 **The Chat Room!** 💬
+# 💬 **The Chat Room! v2.00** 💬
 
 An IRC-style chat room built for **Reticulum NomadNet**, optimized for **MeshChat v2.1+**. Made By F.
 
@@ -22,24 +22,20 @@ Experience the chatroom in action via the official NomadNet page:
 
 # Informations
 
-Welcome to **THE CHATROOM** – v1.45a by F.  
-The first Reticulum/Nomadnet IRC-style chatroom, optimized for Meshchat v2.x+.
+Welcome to **THE CHATROOM** – v2.00 by F.  
+The first Reticulum/Nomadnet IRC-style chatroom, optimized for Nomadnet and Meshchat v2.x+.
 
 Born on v1 (beta) the 10 of August 2025. Enjoy!
 
-**Note:** 
-This chatroom page was developed using MeshChat Browser so it's optimized for MeshChat v2.1+ only, could be unreadable on Nomadnet browser.
+Stable v2.00 update: 01/10/2025
 
-A simpler Nomadnet version is coming soon, work in progress, stay tuned!
-
-The script page is considered in alpha stage of development, stay tuned for new changes and updates!
 ---
 
 ## 📘 Project Overview
 
 This is a Python-based Nomadnet page script that creates a ready-to-run IRC-style chatroom.  
 Just copy all files from this GitHub release into your `./nomadnetwork/storage/pages/` folder,  
-make `index.mu` executable with `chmod +x`, and launch your Nomadnet node.
+make `nomadnet.mu` and `meshchat.mu`executable with `chmod +x`, and launch your Nomadnet node.
 
 Detailed installation info below.
 
@@ -133,14 +129,15 @@ cp -r thechatroom/* ~/.nomadnetwork/storage/pages/
 
 ```
 
-### 🔓 3. Make index.mu and other python pages Executable
+### 🔓 3. Make nomadnet.mu meshchat.mu and other python pages Executable
 
 ```bash
-chmod +x ~/.nomadnetwork/storage/pages/index.mu
+chmod +x ~/.nomadnetwork/storage/pages/nomadnet.mu
+chmod +x ~/.nomadnetwork/storage/pages/meshchat.mu
 chmod +x ~/.nomadnetwork/storage/pages/fullchat.mu
 chmod +x ~/.nomadnetwork/storage/pages/last100.mu
 ```
-Also make sure your user has read and write permission for the json and db files!
+Also make sure your user has read and write permission for the json and db files to be correctly written and saved!
 
 ### 🚀 4. Launch NomadNet
 Install and configure Nomadnet (or other nomadnet hosting page servers), after configuration:
@@ -150,7 +147,7 @@ nomadnet
 
 # DONE!
 
-Note: TheChatRoom has been created and runt on root user machines, probably you need to be root to run it, let me know if you encounter some difficulties!
+Note: TheChatRoom has been created and run on root user machines, probably you need to be root to run it, let me know if you encounter some difficulties!
 
 LXMF Contact: 0d051f3b6f844380c3e0c5d14e37fac8
 ---
@@ -172,8 +169,8 @@ Here are some important details about how **THE CHATROOM** works and what to exp
 - 🧪 The `/meteo` command uses external APIs  
   → Requires `requests` and `geopy` to be installed  
 - 🧱 Built with Python and Micron components  
-  → Compatible with MeshChat v2.1+ only, pure NomadNet version is coming soon!  
-- 🧪 More Features will come soon! Stay Tuned!
+  → Compatible with MeshChat v2.1+ and pure NomadNet client!  
+- 🧪 More Features will come soon! Stay Tuned! 
 
 ---
 
@@ -257,7 +254,9 @@ Here’s the full list of available commands in **THE CHATROOM**, grouped by cat
 The ChatRoom! includes already a good list of antispam filters, based on single words or combined phrases. Add your own or remove the unwanted blocked words to make it less strict in spam_patterns lines section of the script. 
 
 ## Fixed UI Windows
-The UI is fixed in place with DISPLAY_LIMIT var, limited to 28 messages to fit the MeshChat 2.0+ Nomadnet Browser window. 
+The UI is fixed in place with DISPLAY_LIMIT var, limited to ~28 messages to fit the MeshChat 2.0+ Browser window.
+Same for the Nomadnet page with simpler approach to limit lines to ~36 
+Note: Long user messages are split into multiple lines and it can vary the size of the final rendered UI. 
 
 ## NickName Color System
 Automatically color the user nickname for better readability, keeps it persistant for any message or command, same nick, same color, you can edit the default colors in the script.
@@ -279,5 +278,5 @@ Show chat statistics, top chatters, total sent message per user, total users in 
 ### Personalized User Settings
 (eg. set your nickname color preferences, possibility to click nickname to share your lxmf address for private chat, remove your nick and lxmf binding, chat theme selection, ecc.)
 
-### More Administration Commands
+### Administration Commands
 (eg. Add or Remove multiple Administrators)
