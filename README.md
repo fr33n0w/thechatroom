@@ -6,12 +6,9 @@ An IRC-style chat room built for **Reticulum NomadNet**, optimized for **MeshCha
 
 ## 🖼️ The Chat Room UI
 
-Screenshot from MeshChat interface:
+Screenshot from MeshChat index.mu page interface:
 
-<img width="1309" height="991" alt="index" src="https://github.com/user-attachments/assets/f0dd6c27-1495-44a0-b783-e1ac28d74b9d" />
-
-
-<img width="1316" height="851" alt="the chat room" src="https://github.com/user-attachments/assets/371dbcc7-16df-4420-bee8-ec546e3ade3d" />
+<img width="1271" height="717" alt="index mu mod" src="https://github.com/user-attachments/assets/3f6d332a-c4e0-46f6-82ab-f9adb6090fd8" />
 
 ---
 
@@ -33,6 +30,55 @@ Born on v1 (beta) the 10 of August 2025. Enjoy!
 Stable v2.00 update: 01/10/2025
 
 ---
+
+
+# Table of Contents
+
+1. [💬 The Chat Room! v2.00](#-the-chat-room-v200)
+   - [🖼️ The Chat Room UI](#️-the-chat-room-ui)
+   - [🚀 Live Demo](#-live-demo)
+
+2. [📘 Informations](#informations)
+   - [Project Overview](#-project-overview)
+
+3. [🆘 Help Page](#-help-page)
+   - [🧰 Requirements](#-requirements)
+     - [✅ Built-in Modules](#-built-in-modules-no-installation-required)
+     - [🌐 Third-Party Libraries](#-third-party-libraries-install-via-pip)
+
+4. [⚙️ Installation](#️-installation)
+   - [📁 1. Download the Files](#-1-download-the-files)
+   - [📂 2. Copy Files to NomadNet Pages Directory](#-2-copy-files-to-nomadnet-pages-directory)
+   - [🔓 3. Make Files Executable](#-3-make-nomadnetmu-meshchatmu-and-other-python-pages-executable)
+   - [🚀 4. Launch NomadNet](#-4-launch-nomadnet)
+
+5. [⚙️ Technical Notes](#️-technical-notes)
+
+6. [💬 Commands Reference](#-commands-reference)
+   - [📘 General Info & Utility Commands](#-general-info--utility-commands)
+   - [🧠 Interactive Chat Commands](#-interactive-chat-commands)
+   - [🎭 Social Interaction Commands](#-social-interaction-commands)
+   - [👤 User Status Commands](#-user-status-commands)
+   - [🔒 Admin Commands](#-admin-commands-restricted-access)
+
+7. [Other Features](#other-features)
+   - [AntiSpam](#antispam)
+   - [Fixed UI Windows](#fixed-ui-windows)
+   - [NickName Color System](#nickname-color-system)
+   - [Nickname & LXMF Fingerprint Binding](#nickname--lxmf-fingerprint-binding-thanks-to-thomas)
+   - [Long Messages Split Function](#long-messages-split-function)
+   - [Statistics and Users Commands](#statistics-and-users-commands)
+
+8. [Next Work In Progress Features](#next-work-in-progress-features)
+   - [Personalized User Settings](#personalized-user-settings)
+   - [Administration Commands](#administration-commands)
+
+9. [Screenshots](#screenshots)
+   - [Screenshot from v1.45a](#screenshot-from-v145a)
+   - [Screenshots from v2.0](#screenshots-from-v20)
+
+---
+
 
 ## 📘 Project Overview
 
@@ -285,6 +331,11 @@ Show chat statistics, top chatters, total sent message per user, total users in 
 (eg. Add or Remove multiple Administrators)
 
 ---
+
+# Screenshot from v1.45a:
+
+<img width="1316" height="851" alt="the chat room" src="https://github.com/user-attachments/assets/371dbcc7-16df-4420-bee8-ec546e3ade3d" />
+
 # Screenshots from v2.0:
 
 Index.mu Intro page for interface selection:
