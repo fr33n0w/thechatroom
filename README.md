@@ -8,6 +8,9 @@ An IRC-style chat room built for **Reticulum NomadNet**, optimized for **MeshCha
 
 Screenshot from MeshChat interface:
 
+<img width="1309" height="991" alt="index" src="https://github.com/user-attachments/assets/f0dd6c27-1495-44a0-b783-e1ac28d74b9d" />
+
+
 <img width="1316" height="851" alt="the chat room" src="https://github.com/user-attachments/assets/371dbcc7-16df-4420-bee8-ec546e3ade3d" />
 
 ---
@@ -280,3 +283,15 @@ Show chat statistics, top chatters, total sent message per user, total users in 
 
 ### Administration Commands
 (eg. Add or Remove multiple Administrators)
+
+---
+# Screenshots from v2.0:
+
+Index.mu Intro page for interface selection:
+<img width="1309" height="991" alt="index" src="https://github.com/user-attachments/assets/3ff32000-af9c-4d86-8f28-7458576e2e21" />
+
+Meshchat >v2.0+ UI Interface:
+<img width="1308" height="926" alt="meshchat" src="https://github.com/user-attachments/assets/656a607a-4b40-46cc-9103-118824d42a74" />
+
+NomadNet UI Interface:
+<img width="1493" height="899" alt="nomadnet" src="https://github.com/user-attachments/assets/51c7eb2c-e238-4c55-9bae-3ae39ced6073" />
